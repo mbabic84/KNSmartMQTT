@@ -1,0 +1,17 @@
+homeassistant: false
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://localhost
+serial:
+  port: /dev/ttyUSB0
+advanced:
+  log_level: debug
+external_converters:
+  - tesla-radiator-valve-v5.js
+devices:
+  '0x847127fffe04deb8':
+    friendly_name: '0x847127fffe04deb8'
+    debounce: 1
+  '0x847127fffe21ab4b':
+    friendly_name: '0x847127fffe21ab4b'
+    debounce: 1
