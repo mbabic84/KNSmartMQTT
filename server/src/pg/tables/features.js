@@ -1,9 +1,9 @@
 export default [
     `CREATE TABLE IF NOT EXISTS "features" (
         "key" TEXT PRIMARY KEY,
-        "deviceKey" TEXT REFERENCES "devices" ("key"),
-        "type" TEXT,
-        "value" TEXT,
+        "deviceKey" TEXT REFERENCES "devices" ("key") ON DELETE CASCADE,
+        "type" TEXT NOT NULL,
+        "value" TEXT NOT NULL,
         "config" JSONB,
         "updated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,

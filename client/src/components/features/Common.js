@@ -2,14 +2,6 @@ import React, { useState } from 'react';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import {
-    red,
-    grey,
-    blueGrey,
-    lime,
-    blue,
-    green
-} from '@mui/material/colors';
 import Typography from '@mui/material/Typography';
 
 import FeatureSettings from '../FeatureSettings';
@@ -17,27 +9,12 @@ import FeatureDetails from '../FeatureDetails';
 
 import SettingsButton from '../../atoms/SettingsButton';
 import DetailsButton from '../../atoms/DetailsButton';
+import RulesButton from '../../atoms/RulesButton';
 
-import TemperatureContent from './TemperatureContent';
+import NumericContent from './NumericContent';
 import RelayContent from './RelayContent';
-import HumidityContent from './HumidityContent';
-import PressureContent from './PressureContent';
 
-const TYPE_COLOR = {
-    temperature: {
-        avatar: red[800]
-    },
-    relay: {
-        avatar: lime[800]
-    },
-    humidity: {
-        avatar: blue[800]
-    },
-    pressure: {
-        avatar: green[800]
-    },
-    default: blueGrey[800]
-}
+import Constants from '../../Constants';
 
 export default function (props) {
     const [settingsActive, setSettingsActive] = useState(false);
@@ -62,7 +39,7 @@ export default function (props) {
     function settings() {
         if (settingsActive) {
             return (
-                <FeatureSettings {...props} onClose={handleSettingsClose}
+                <FeatureSettings key={props.featureKey} {...props} onClose={handleSettingsClose}
                 />
             )
         }
@@ -71,28 +48,48 @@ export default function (props) {
     function details() {
         if (detailsActive) {
             return (
-                <FeatureDetails {...props} onClose={handleDetailsClose} />
+                <FeatureDetails key={props.featureKey} {...props} onClose={handleDetailsClose} />
             )
+        }
+    }
+
+    function rulesButton() {
+        switch(props.type) {
+            case "temperature":
+            case "pressure":
+            case "humidity":
+                return (
+                    <RulesButton />
+                )
         }
     }
 
     function content() {
         switch (props.type) {
             case "temperature":
+            case "humidity":
+            case "pressure":
+            case "setpoint":
                 return (
-                    <TemperatureContent {...props} />
+                    <NumericContent
+                        key={props.featureKey}
+                        {...props}
+                        unit={Constants.units?.type?.[props.type]}
+                        decimal
+                    />
+                )
+            case "rssi":
+            case "battery":
+                return (
+                    <NumericContent
+                        key={props.featureKey}
+                        {...props}
+                        unit={Constants.units?.type?.[props.type]}
+                    />
                 )
             case "relay":
                 return (
-                    <RelayContent {...props} />
-                )
-            case "humidity":
-                return (
-                    <HumidityContent {...props} />
-                )
-            case "pressure":
-                return (
-                    <PressureContent {...props} />
+                    <RelayContent key={props.featureKey} {...props} />
                 )
             default:
                 return (
@@ -104,8 +101,8 @@ export default function (props) {
                                 margin: 1
                             }}
                         >
-                            <Typography variant='h2' sx={{ color: TYPE_COLOR.default }}>
-                                ???
+                            <Typography variant='h2' sx={{ color: Constants.colors.default.primary }}>
+                                {props.value}
                             </Typography>
                         </Container>
                     </Box>
@@ -120,7 +117,7 @@ export default function (props) {
                 sx={{
                     margin: 1,
                     width: 300,
-                    borderColor: TYPE_COLOR[props.type]?.avatar || TYPE_COLOR.default,
+                    borderColor: Constants.colors.type[props.type]?.primary || Constants.colors.default.primary,
                     display: 'flex'
                 }}
             >
@@ -144,7 +141,8 @@ export default function (props) {
                             sx={{
                                 overflow: 'hidden',
                                 whiteSpace: 'nowrap',
-                                textOverflow: 'ellipsis'
+                                textOverflow: 'ellipsis',
+                                color: Constants.colors.text.primary
                             }}
                         >
                             {props.config.name || props.featureKey}
@@ -154,7 +152,8 @@ export default function (props) {
                             sx={{
                                 overflow: 'hidden',
                                 whiteSpace: 'nowrap',
-                                textOverflow: 'ellipsis'
+                                textOverflow: 'ellipsis',
+                                color: Constants.colors.text.secondary
                             }}
                         >
                             {props.config.description || props.type}
@@ -174,6 +173,7 @@ export default function (props) {
                     }}
                 >
                     <DetailsButton onClick={handleDetailsClick} />
+                    {rulesButton()}
                     <SettingsButton onClick={handleSettingsClick} />
                 </Box>
             </Card>

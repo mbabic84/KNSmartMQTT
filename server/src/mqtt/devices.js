@@ -1,5 +1,6 @@
 import pgDevices from '../pg/devices.js';
-import features from '../pg/features.js';
+import pgFeatures from '../pg/features.js';
+import heaterControl from '../control/heater/index.js';
 
 const knownZigbeeDevices = {
     zbtrv: {
@@ -36,20 +37,15 @@ function getZigBeeDevice(device) {
     return zigBeeDevice;
 }
 
-async function addZigBee(mqttMessage) {
-    const devices = JSON.parse(mqttMessage);
+async function addZigBee(device) {
+    const zigBeeDevice = getZigBeeDevice(device);
 
-    return await Promise
-        .all(
-            devices
-                .map((device) => {
-                    return getZigBeeDevice(device);
-                })
-                .filter((device) => device)
-                .map((device) => {
-                    return pgDevices.set(device);
-                })
-        )
+    if (zigBeeDevice) {
+        const d = await pgDevices.set(zigBeeDevice);
+        console.log(`Device ${d.key} was saved!`);
+
+        return d;
+    }
 }
 
 function getKnDevice(device) {
@@ -63,16 +59,19 @@ function getKnDevice(device) {
     }
 }
 
-async function addKN(mqttMessage) {
-    const device = JSON.parse(mqttMessage);
-    const pgDevice = await pgDevices.set(getKnDevice(device));
+async function addKN(device) {
+    const d = await pgDevices.set(getKnDevice(device));
 
-    return pgDevice;
+    console.log(`Device ${d.key} was saved!`);
+
+    return d;
 }
 
-function saveReport(topic, report) {
+async function saveReport(topic, mqttMessage) {
     const deviceKey = topic.split("/")[1];
-    features.saveReport(report, deviceKey);
+    const report = JSON.parse(mqttMessage);
+    await pgFeatures.saveReport(report, deviceKey);
+    await heaterControl.heat(deviceKey);
 }
 
 export default {

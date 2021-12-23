@@ -27,7 +27,7 @@ export default function (props) {
     async function save() {
         if (name) {
             try {
-                const newGroup = await GroupsApi.update(
+                const newGroup = await GroupsApi.set(
                     key,
                     name,
                     index

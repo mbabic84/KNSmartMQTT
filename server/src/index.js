@@ -1,21 +1,16 @@
-import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
+import consoleStamp from 'console-stamp';
 
 import pg from './pg/index.js';
 import mqtt from './mqtt/index.js';
+import server from './server/index.js';
 
-import config from './config/index.js';
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-
-const port = process.env.PORT || config.port || 9578;
+consoleStamp(
+    console,
+    {
+        format: ':date(yyyy-mm-dd HH:MM:ss) :label'
+    }
+);
 
 await pg.init();
 await mqtt.init();
-
-server.listen(port, () => {
-    console.log(`Server listening on port ${port}!`);
-});
+await server.init();

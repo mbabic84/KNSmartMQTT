@@ -1,9 +1,7 @@
 export default [
-    `CREATE TABLE IF NOT EXISTS "devices" (
+    `CREATE TABLE IF NOT EXISTS "configuration" (
         "key" TEXT PRIMARY KEY,
-        "type" TEXT NOT NULL,
         "data" JSONB,
-        "config" JSONB,
         "created" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`
-];
+]

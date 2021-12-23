@@ -72,7 +72,7 @@ export default function (props) {
 
     async function removeGroup() {
         try {
-            await GroupsApi.remove(props.groupKey);
+            await GroupsApi.del(props.groupKey);
             setGroups(
                 _.filter(groups, (group) => group.key !== props.groupKey)
             );
@@ -94,7 +94,11 @@ export default function (props) {
 
     function listFeatures() {
         return _.map(groupFeatures, (feature) => {
-            return <CommonFeature featureKey={feature.key} {...feature} />
+            return <CommonFeature
+                featureKey={feature.key}
+                {...feature}
+                group={{...props}}
+            />
         })
     }
 
@@ -117,7 +121,7 @@ export default function (props) {
                         justifyContent: 'space-between',
                         flexGrow: 1
                     }}>
-                        <Typography variant='h6'>
+                        <Typography variant='h6' sx={{ color: Constants.colors.text.primary }}>
                             {props.name}
                         </Typography>
                         <GroupRemoveButton groupName={props.name} removeGroup={removeGroup} />

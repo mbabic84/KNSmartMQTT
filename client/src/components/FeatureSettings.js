@@ -90,6 +90,7 @@ export default function (props) {
                     paddingBottom: 3
                 }}
                 maxWidth='xs'
+                onClick={(event) => event.stopPropagation()}
             >
                 <Box
                     sx={{ display: 'flex', gap: 4, flexDirection: 'column' }}

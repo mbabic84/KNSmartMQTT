@@ -10,24 +10,6 @@ const ALERT_TIMEOUT = 5 * 1000;
 export default function () {
     const { alerts, setAlerts } = useContext(AlertsContext);
 
-    useEffect(() => {
-        let interval = setInterval(() => {
-            clearAlerts();
-        }, 1000);
-
-        return () => {
-            if (interval) {
-                clearInterval(interval);
-            }
-        }
-    }, [alerts])
-
-    function clearAlerts() {
-        setAlerts(_.filter(alerts, (alert) => {
-            return Date.now() - alert.created < ALERT_TIMEOUT;
-        }));
-    }
-
     function handleOnClose(key) {
         setAlerts(_.filter(alerts, (alert) => {
             return alert.key !== key;

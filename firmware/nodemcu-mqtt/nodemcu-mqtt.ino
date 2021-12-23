@@ -138,8 +138,8 @@ void executeSet(byte* payload, unsigned int length) {
     relayState[0].state = doc["relay"]["0"]["state"];
   }
 
-  if (doc["relay"]["0"]["duration"].is<int>() && doc["relay"]["0"]["duration"] > 0) {
-    int duration = doc["relay"]["0"]["duration"];
+  if (doc["relay"]["0"]["duration"].is<double>() && doc["relay"]["0"]["duration"] > 0) {
+    double duration = doc["relay"]["0"]["duration"];
     relayState[0].ttl = millis() + (duration * 1000);
   }
 
@@ -147,8 +147,8 @@ void executeSet(byte* payload, unsigned int length) {
     relayState[1].state = doc["relay"]["1"]["state"];
   }
 
-  if (doc["relay"]["1"]["duration"].is<int>() && doc["relay"]["1"]["duration"] > 0) {
-    int duration = doc["relay"]["1"]["duration"];
+  if (doc["relay"]["1"]["duration"].is<double>() && doc["relay"]["1"]["duration"] > 0) {
+    double duration = doc["relay"]["1"]["duration"];
     relayState[1].ttl = millis() + (duration * 1000);
   }
 
@@ -186,7 +186,7 @@ void publishReadings() {
             "}";
 
   mqtt.publish(topic.c_str(), payload.c_str());
-  
+
   lastAnnounced = millis();
 }
 
@@ -194,7 +194,7 @@ void readSensors() {
   temperature.add((am2320.readTemperature() + bmp.readTemperature()) / 2);
   humidity.add(am2320.readHumidity());
   pressure.add(bmp.readPressure() / 100);
-  
+
   lastSensorRead = millis();
 }
 

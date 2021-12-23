@@ -1,17 +1,19 @@
 import axios from 'axios';
 import moment from 'moment';
 
+import ApiUrl from '../utils/ApiUrl.js';
+
 async function getAll() {
     const response = await axios
-        .get('http://10.0.0.40:8740/features')
+        .get(`${ApiUrl()}/features`)
 
     return response.data;
 }
 
 async function setConfig(key, config) {
     const response = await axios
-        .post(
-            'http://10.0.0.40:8740/feature/config',
+        .put(
+            `${ApiUrl()}/feature/config`,
             {
                 key,
                 config
@@ -21,14 +23,13 @@ async function setConfig(key, config) {
     return response.data;
 }
 
-async function getChartData(nodeKey, type, since = moment().subtract(1, "hours").format()) {
+async function getChartData(featureKey, since = moment().subtract(1, "hours").format()) {
     const response = await axios
         .get(
-            'http://10.0.0.40:8740/feature/chart',
+            `${ApiUrl()}/feature/chart`,
             {
                 params: {
-                    nodeKey,
-                    type,
+                    featureKey,
                     since
                 }
 

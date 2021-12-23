@@ -4,19 +4,21 @@ import ApiUrl from '../utils/ApiUrl.js';
 
 async function getAll() {
     const response = await axios
-        .get(`${ApiUrl()}/groups`)
+        .get(`${ApiUrl()}/rules`)
 
     return response.data;
 }
 
-async function set(key, name, index = 0, config = { expanded: true }) {
+async function set(key, type, current, setpoint, handler, config = {}) {
     const response = await axios
-        .put(
-            `${ApiUrl()}/group`,
+        .post(
+            `${ApiUrl()}/rule`,
             {
                 key,
-                name,
-                index,
+                type,
+                current,
+                setpoint,
+                handler,
                 config
             }
         );
@@ -27,7 +29,7 @@ async function set(key, name, index = 0, config = { expanded: true }) {
 async function del(key) {
     await axios
         .delete(
-            `${ApiUrl()}/group`,
+            `${ApiUrl()}/rule`,
             {
                 params: {
                     key

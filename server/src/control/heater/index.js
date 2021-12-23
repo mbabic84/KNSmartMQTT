@@ -1,0 +1,89 @@
+import _ from 'lodash';
+import { PIDController } from '@mariusrumpf/pid-controller';
+
+import Config from '../../config/index.js';
+import mqtt from '../../mqtt/index.js';
+
+import Constants from "../../Constants.js";
+
+const pid = new PIDController(Constants.defaults.heater.pid);
+let lastPidUpdate;
+let locked;
+
+// async function getControl() {
+//     return pgRules.get("heater");
+// }
+
+// async function getControlRule() {
+//     const control = await getControl();
+//     const rules = _.sortBy(control, ['current.value']);
+
+//     return _.last(rules);
+// }
+
+async function heat(deviceKey) {
+    if (locked) {
+        return;
+    }
+
+    const config = await Config.get("heater");
+    // const rule = await getControlRule();
+    const rule = null;
+
+    if (!rule || rule.current.device.key != deviceKey) {
+        return;
+    }
+
+    locked = true;
+
+    const target = Number(rule.setpoint.value) + (Constants.defaults.heater.offset?.[rule.current.device.type] || 0);
+    const input = Number(rule.current.value);
+    const type = rule.handler.type;
+    const index = rule.handler.key.split("/")[2];
+    const sampleTime = lastPidUpdate ? Date.now() - lastPidUpdate : 1;
+
+    pid.setTunings(config.pid.p, config.pid.i, config.pid.d);
+    pid.setSampleTime(sampleTime);
+    pid.setOutputLimits(config.pid.outputMin, config.pid.outputMax);
+    pid.setTarget(target);
+
+    const output = pid.update(input);
+
+    lastPidUpdate = Date.now();
+
+    const topic = `kn2mqtt/${rule.handler.device.key}/set`;
+    const payload = JSON.stringify({
+        [type]: {
+            [index]: {
+                state: !!(output),
+                duration: output
+            }
+        }
+    });
+
+    console.log(target, input, output, sampleTime);
+
+    if (output < config.limit.min) {
+        locked = false;
+        return;
+    }
+
+    await mqtt.publish(
+        topic,
+        payload
+    );
+
+    console.log(topic, payload);
+
+    /* 
+    * Keep heater locked for 5 seconds in case of repeated 0 power requests
+    * ZigBee2mqtt tends to duplicate some messages
+    */
+    setTimeout(() => {
+        locked = false;
+    }, output * 1000 || 5 * 1000);
+}
+
+export default {
+    heat
+}
