@@ -10,7 +10,8 @@ async function get() {
                 to_jsonb("fsp") - '{"deviceKey", "config"}'::text[] 
                 || jsonb_build_object('device', to_jsonb("fspd") - '{"data", "config", "created"}'::text[]) AS "setpoint",
                 to_jsonb("fh") - '{"deviceKey", "config"}'::text[] 
-                || jsonb_build_object('device', to_jsonb("fhd") - '{"data", "config", "created"}'::text[]) AS "handler"
+                || jsonb_build_object('device', to_jsonb("fhd") - '{"data", "config", "created"}'::text[]) AS "handler",
+                "r"."config" AS "config"
             FROM 
                 "rules" AS "r" 
             LEFT JOIN 
@@ -24,21 +25,32 @@ async function get() {
             LEFT JOIN
                 "devices" AS "fspd" ON "fsp"."deviceKey" = "fspd"."key"
             LEFT JOIN
-                "devices" AS "fhd" ON "fh"."deviceKey" = "fhd"."key"`
+                "devices" AS "fhd" ON "fh"."deviceKey" = "fhd"."key"
+            WHERE "r"."active" IS TRUE`
         )
 
     return pgResult.rows;
 }
 
-async function set({ key, type, current, setpoint, handler, config = {} }) {
+async function getSimple() {
+    const pgResult = await pgPool()
+        .query(`SELECT * FROM "rules" ORDER BY "created" DESC`);
+
+    return pgResult.rows;
+}
+
+async function set({ key, type, current, setpoint, handler, active, config = {} }) {
+    config = JSON.stringify(config);
+
     const pgResult = await pgPool()
         .query(
             `INSERT INTO "rules" (
-                "key"
+                "key",
                 "type",
                 "current",
                 "setpoint",
                 "handler",
+                "active",
                 "config"
             ) VALUES (
                 '${key}',
@@ -46,12 +58,14 @@ async function set({ key, type, current, setpoint, handler, config = {} }) {
                 '${current}',
                 '${setpoint}',
                 '${handler}',
+                ${active},
                 '${config}'
             ) ON CONFLICT (key) DO UPDATE SET
                 "type" = '${type}',
                 "current" = '${current}',
                 "setpoint" = '${setpoint}',
                 "handler" = '${handler}',
+                "active" = ${active},
                 "config" = "rules"."config" || '${config}'::JSONB
             RETURNING *`
         )
@@ -68,5 +82,7 @@ async function del(key) {
 
 export default {
     get,
-    set
+    getSimple,
+    set,
+    del
 }

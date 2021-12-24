@@ -44,7 +44,7 @@ export default function (props) {
 
     async function updateGroup(name, index, config) {
         try {
-            const updatedGroup = await GroupsApi.update(props.groupKey, name, index, config);
+            const updatedGroup = await GroupsApi.set(props.groupKey, name, index, config);
             setGroups(
                 _.map(groups, (group) => {
                     if (group.key === props.groupKey) {

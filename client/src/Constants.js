@@ -1,6 +1,14 @@
 import { colors } from '@mui/material'
 
 export default {
+    rules: {
+        types: {
+            "heater": {
+                name: "Vytápění",
+                description: "Řídí spínání kotle podle nastavené teploty"
+            }
+        }
+    },
     units: {
         type: {
             temperature: '°C',
@@ -51,6 +59,10 @@ export default {
         },
         charts: {
             reference: colors.blueGrey[200]
+        },
+        select: {
+            primary: colors.grey[100],
+            secondary: colors.grey[500]
         }
     }
 }

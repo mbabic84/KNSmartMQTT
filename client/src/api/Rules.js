@@ -9,9 +9,9 @@ async function getAll() {
     return response.data;
 }
 
-async function set(key, type, current, setpoint, handler, config = {}) {
+async function set({key, type, current, setpoint, handler, active, config = {}}) {
     const response = await axios
-        .post(
+        .put(
             `${ApiUrl()}/rule`,
             {
                 key,
@@ -19,6 +19,7 @@ async function set(key, type, current, setpoint, handler, config = {}) {
                 current,
                 setpoint,
                 handler,
+                active,
                 config
             }
         );

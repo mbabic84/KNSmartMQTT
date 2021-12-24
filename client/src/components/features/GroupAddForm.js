@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
-import SvgIcon from '@mui/material/SvgIcon';
-import { grey, yellow } from '@mui/material/colors';
-import Backdrop from '@mui/material/Backdrop';
+import {
+    Box,
+    Container,
+    Button,
+    TextField,
+    Backdrop
+} from '@mui/material'
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 
@@ -13,9 +13,6 @@ import { GroupsContext, AlertsContext } from '../../App';
 
 import GroupsApi from '../../api/Groups';
 import SetAlert from '../../utils/SetAlert';
-
-import SaveIcon from '../../assets/icons/save-svgrepo-com.svg';
-import DiscardIcon from '../../assets/icons/cancel-cross-svgrepo-com.svg';
 
 export default function (props) {
     const { groups, setGroups } = useContext(GroupsContext);
@@ -63,6 +60,7 @@ export default function (props) {
             sx={{
                 zIndex: 1
             }}
+            onClick={props.onClose}
         >
             <Container
                 sx={{
@@ -73,6 +71,7 @@ export default function (props) {
                     paddingBottom: 3
                 }}
                 maxWidth='xs'
+                onClick={(e) => e.stopPropagation()}
             >
                 <Box
                     sx={{ display: 'flex', gap: 4, flexDirection: 'column' }}
@@ -109,22 +108,12 @@ export default function (props) {
                         marginTop: 5
                     }}
                 >
-                    <IconButton onClick={save}>
-                        <SvgIcon
-                            component={SaveIcon}
-                            viewBox='0 0 502 502'
-                            fontSize='inherit'
-                            sx={{ fill: !name ? grey[600] : yellow[600] }}
-                        />
-                    </IconButton>
-                    <IconButton onClick={props.onClose}>
-                        <SvgIcon
-                            component={DiscardIcon}
-                            viewBox='0 0 502 502'
-                            fontSize='inherit'
-                            color='error'
-                        />
-                    </IconButton>
+                    <Button onClick={save}>
+                        Uložit
+                    </Button>
+                    <Button onClick={props.onClose}>
+                        Zahodit
+                    </Button>
                 </Box>
             </Container>
         </Backdrop>

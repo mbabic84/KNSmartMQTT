@@ -65,7 +65,6 @@ export default function (props) {
     }
 
     function customXAxisTick({ x, y, stroke, payload }) {
-        console.log(payload);
         return (
             <g transform={`translate(${x},${y})`}>
                 <text
@@ -198,10 +197,10 @@ export default function (props) {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <Typography variant='h3'>
-                                {props.config.name || props.featureKey}
+                                {props.config?.name || props.featureKey}
                             </Typography>
                             <Typography variant='caption' sx={{ color: Constants.colors.text.secondary, marginLeft: 2 }}>
-                                {props.config.description || props.type}
+                                {props.config?.description || props.type}
                             </Typography>
                         </Box>
                         <Box>
@@ -218,7 +217,7 @@ export default function (props) {
                         }}
                     >
                         <Typography variant='subtitle2' sx={{ color: Constants.colors.text.secondary }}>
-                            {props.group.name}
+                            {props.group?.name}
                         </Typography>
                         <Box
                             sx={{ display: 'flex', flexDirection: 'column' }}

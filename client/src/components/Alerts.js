@@ -24,7 +24,8 @@ export default function () {
                     severity={alert.type}
                     variant='filled'
                     sx={{
-                        margin: 1
+                        margin: 1,
+                        zIndex: 9999
                     }}
                     onClose={() => handleOnClose(alert.key)}
                 >

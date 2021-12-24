@@ -5,7 +5,7 @@ import socketio from '../socketio/index.js';
 
 async function get() {
     const pgResult = await pgPool()
-        .query(`SELECT * FROM "features" ORDER BY "type", "key"`);
+        .query(`SELECT * FROM "features"`);
 
     return pgResult.rows;
 }

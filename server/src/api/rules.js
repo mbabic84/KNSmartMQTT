@@ -1,7 +1,7 @@
 import pgRules from "../pg/rules.js";
 
 async function get(request, response) {
-    const get = await pgRules.get();
+    const get = await pgRules.getSimple();
     response.send(get);
 }
 

@@ -4,8 +4,12 @@ import serverConfig from '../config/server.js';
 import Config from '../config/index.js';
 import pgDevices from '../pg/devices.js';
 
+import getStartDelay from '../../utils/getStartDelay.js';
+
 let client;
 let deviceTopics = [];
+let loopConfig;
+let loopStarted;
 
 async function subscribeDevice(topic, client) {
     if (!deviceTopics.includes(topic)) {
@@ -45,14 +49,32 @@ async function processKNDevice(message) {
 }
 
 async function loop() {
-    const config = await Config.get("mqtt");
-
-    if (config.allowGet) {
-        const devices = await pgDevices.get();
-        requestMessageFromDevices(devices);
+    // Startup delay to allow MQTT settle
+    if (!loopStarted) {
+        loopStarted = Date.now();
+    }
+    if (Date.now() - loopStarted < 15 * 1000) {
+        return;
     }
 
-    setTimeout(loop, config.intervals.get * 1000);
+    const date = new Date();
+    const seconds = (date.getMinutes() * 60) + date.getSeconds();
+
+    if (
+        !loopConfig
+        || seconds % 60 === 0
+    ) {
+        loopConfig = await await Config.get("mqtt");
+    }
+
+    if (loopConfig.intervals?.get && seconds % loopConfig.intervals.get === 0) {
+        if (loopConfig.allowGet) {
+            const devices = await pgDevices.get();
+            requestMessageFromDevices(devices);
+        } else {
+            console.warn("Configuration mqtt.allowGet is disabled or missing!");
+        }
+    }
 }
 
 async function requestMessageFromDevices(devices) {
@@ -121,10 +143,9 @@ async function init() {
         .publish("kn2mqtt/devices/ping", "", client)
         .finally(() => console.log("KN2Mqtt devices pinged!"));
 
-    /*
-    * Let MQTT some time to settle, due to debounce setting, there are some delays in MQTT system
-    */
-    setTimeout(loop, 10 * 1000);
+    setInterval(() => {
+        loop();
+    }, 1000);
 }
 
 export default {

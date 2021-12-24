@@ -4,35 +4,39 @@ import { PIDController } from '@mariusrumpf/pid-controller';
 import Config from '../../config/index.js';
 import mqtt from '../../mqtt/index.js';
 
+import pgRules from '../../pg/rules.js';
+
 import Constants from "../../Constants.js";
 
 const pid = new PIDController(Constants.defaults.heater.pid);
 let lastPidUpdate;
 let locked;
 
-// async function getControl() {
-//     return pgRules.get("heater");
-// }
+async function getRules() {
+    return pgRules.get("heater");
+}
 
-// async function getControlRule() {
-//     const control = await getControl();
-//     const rules = _.sortBy(control, ['current.value']);
+async function getRule() {
+    const control = await getRules();
+    const rules = _.sortBy(control, ['current.value']);
 
-//     return _.last(rules);
-// }
+    return _.last(rules);
+}
 
 async function heat(deviceKey) {
     if (locked) {
         return;
     }
 
-    const config = await Config.get("heater");
-    // const rule = await getControlRule();
-    const rule = null;
+    const rule = await getRule();
 
     if (!rule || rule.current.device.key != deviceKey) {
         return;
     }
+
+    const defaults = await Config.get("heater");
+    const rewrites = rule.config;
+    const config = _.merge(defaults, rewrites);
 
     locked = true;
 

@@ -65,13 +65,30 @@ function App() {
     function initIoUpdates() {
         ioUpdatesRef.current = io(ApiUrl(), { path: '/updates' });
         ioUpdatesRef.current.on("feature", (featureUpdate) => {
-            setFeatures(_.map(featuresRef.current, (feature) => {
-                if (feature.key === featureUpdate.key) {
-                    return featureUpdate;
-                } else {
-                    return feature;
-                }
-            }));
+            let oldFeature = featuresRef.current.find((feature) => {
+                return feature.key === featureUpdate.key;
+            });
+
+            if (oldFeature) {
+                setFeatures(_.map(featuresRef.current, (feature) => {
+                    if (feature.key === featureUpdate.key) {
+                        return featureUpdate;
+                    } else {
+                        return feature;
+                    }
+                }));
+            } else {
+                SetAlert(
+                    `Byl nalezen nový prvek ${featureUpdate.key}`,
+                    "success",
+                    alerts,
+                    setAlerts
+                );
+                setFeatures([
+                    ...featuresRef.current,
+                    featureUpdate
+                ])
+            }
         });
     }
 

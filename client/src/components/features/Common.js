@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 
 import FeatureSettings from '../FeatureSettings';
 import FeatureDetails from '../FeatureDetails';
+import FeatureRules from '../FeatureRules';
 
 import SettingsButton from '../../atoms/SettingsButton';
 import DetailsButton from '../../atoms/DetailsButton';
@@ -18,28 +19,39 @@ import Constants from '../../Constants';
 
 export default function (props) {
     const [settingsActive, setSettingsActive] = useState(false);
-    const [detailsActive, setDetailssActive] = useState(false);
+    const [detailsActive, setDetailsActive] = useState(false);
+    const [rulesActive, setRulesActive] = useState(false);
 
     function handleDetailsClick() {
-        setDetailssActive(true);
+        setDetailsActive(true);
     }
 
     function handleDetailsClose() {
-        setDetailssActive(false);
+        setDetailsActive(false);
     }
 
     function handleSettingsClick() {
-        setSettingsActive(!settingsActive);
+        setSettingsActive(true);
     }
 
     function handleSettingsClose() {
         setSettingsActive(false);
     }
 
+    function handleRulesClick() {
+        setRulesActive(true);
+    }
+
+    function handleRulesClose() {
+        setRulesActive(false);
+    }
+
     function settings() {
         if (settingsActive) {
             return (
-                <FeatureSettings key={props.featureKey} {...props} onClose={handleSettingsClose}
+                <FeatureSettings
+                    {...props}
+                    onClose={handleSettingsClose}
                 />
             )
         }
@@ -48,18 +60,34 @@ export default function (props) {
     function details() {
         if (detailsActive) {
             return (
-                <FeatureDetails key={props.featureKey} {...props} onClose={handleDetailsClose} />
+                <FeatureDetails
+                    {...props}
+                    onClose={handleDetailsClose}
+                />
+            )
+        }
+    }
+
+    function rules() {
+        if (rulesActive) {
+            return (
+                <FeatureRules
+                    {...props}
+                    onClose={handleRulesClose}
+                />
             )
         }
     }
 
     function rulesButton() {
-        switch(props.type) {
+        switch (props.type) {
             case "temperature":
             case "pressure":
             case "humidity":
                 return (
-                    <RulesButton />
+                    <RulesButton
+                        onClick={handleRulesClick}
+                    />
                 )
         }
     }
@@ -179,6 +207,7 @@ export default function (props) {
             </Card>
             {settings()}
             {details()}
+            {rules()}
         </Box>
     )
 }

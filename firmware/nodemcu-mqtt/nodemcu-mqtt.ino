@@ -20,9 +20,10 @@ Smoothed <float> temperature;
 Smoothed <float> humidity;
 Smoothed <float> pressure;
 
+const long selfReportInterval = 60 * 60 * 1000;
+
 long lastSensorRead;
-long lastAnnounced;
-bool introduced;
+long lastSelfReport;
 
 String clientId;
 String topic;
@@ -76,15 +77,17 @@ void setup() {
 
 void loop() {
   mqttConnect();
-  introduce();
   sensors();
-  announce();
   relayTTL();
+  selfReport();
 }
 
-void announce() {
-  if (!lastAnnounced || millis() - lastAnnounced > 60 * 60 * 1000) {
+void selfReport() {
+  if (!lastSelfReport || millis() - lastSelfReport > selfReportInterval) {
+    introduce();
     publishReadings();
+    
+    lastSelfReport = millis();
   }
 }
 
@@ -104,13 +107,6 @@ void sensors() {
   }
 }
 
-void introduce() {
-  if (!introduced) {
-    introduceMqttDevice();
-    introduced = true;
-  }
-}
-
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
   if (String(topic) == "kn2mqtt/" + clientId + "/set") {
     executeSet(payload, length);
@@ -121,7 +117,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
 
   if (String(topic) == "kn2mqtt/devices/ping") {
-    introduceMqttDevice();
+    introduce();
   }
 }
 
@@ -186,8 +182,6 @@ void publishReadings() {
             "}";
 
   mqtt.publish(topic.c_str(), payload.c_str());
-
-  lastAnnounced = millis();
 }
 
 void readSensors() {
@@ -226,7 +220,7 @@ void mqttConnect() {
   }
 }
 
-void introduceMqttDevice() {
+void introduce() {
   topic = "kn2mqtt/devices";
   payload = "{\n"
             " \"key\": \"" + clientId + "\",\n"

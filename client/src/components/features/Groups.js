@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 import { GroupsContext } from '../../App';
 import Group from './Group';
-import GroupAddButton from '../../atoms/GroupAddButton';
+import AddButton from '../../atoms/AddButton';
 import GroupAddForm from './GroupAddForm';
 
 export default function (props) {
@@ -37,7 +37,7 @@ export default function (props) {
             <Container
                 sx={{ display: 'flex', justifyContent: 'center' }}
             >
-                <GroupAddButton onClick={() => setNewGroupFormOpen(true)} />
+                <AddButton onClick={() => setNewGroupFormOpen(true)} />
             </Container>
         )
     }
