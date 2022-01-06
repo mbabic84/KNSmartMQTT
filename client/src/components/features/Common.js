@@ -84,6 +84,7 @@ export default function (props) {
             case "temperature":
             case "pressure":
             case "humidity":
+            case "relay":
                 return (
                     <RulesButton
                         onClick={handleRulesClick}

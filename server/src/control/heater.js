@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import { PIDController } from '@mariusrumpf/pid-controller';
 
-import Config from '../../config/index.js';
-import mqtt from '../../mqtt/index.js';
+import Config from '../config/index.js';
+import mqtt from '../mqtt/index.js';
+import log from '../utils/log.js';
 
-import pgRules from '../../pg/rules.js';
+import pgRules from '../pg/rules.js';
 
-import Constants from "../../Constants.js";
+import Constants from "../Constants.js";
 
 const pid = new PIDController(Constants.defaults.heater.pid);
 let lastPidUpdate;
@@ -65,7 +66,7 @@ async function heat(deviceKey) {
         }
     });
 
-    console.log(target, input, output, sampleTime);
+    log(target, input, output, sampleTime);
 
     if (output < config.limit.min) {
         locked = false;
@@ -77,15 +78,9 @@ async function heat(deviceKey) {
         payload
     );
 
-    console.log(topic, payload);
-
-    /* 
-    * Keep heater locked for 5 seconds in case of repeated 0 power requests
-    * ZigBee2mqtt tends to duplicate some messages
-    */
     setTimeout(() => {
         locked = false;
-    }, output * 1000 || 5 * 1000);
+    }, sampleTime - (15 * 1000));
 }
 
 export default {

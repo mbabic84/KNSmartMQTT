@@ -1,14 +1,18 @@
 import React from 'react';
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
+
+import Log from '../Log';
 
 function Settings(props) {
     return (
         <Box
             sx={{
                 display: props.activeTab === props.index ? 'flex' : 'none',
-                flexWrap: 'wrap'
+                flexDirection: 'column',
+                gap: 1
             }}
         >
+            <Log />
         </Box>
     )
 }

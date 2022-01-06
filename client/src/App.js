@@ -1,18 +1,31 @@
-import React, { useEffect, useState, createContext, useContext, useRef } from 'react';
-import { Route, BrowserRouter, Routes, Link } from "react-router-dom";
-import _ from 'lodash';
-import { createTheme, ThemeProvider } from '@mui/material';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Backdrop from '@mui/material/Backdrop';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import SvgIcon from '@mui/material/SvgIcon';
+import React, {
+    useEffect,
+    useState,
+    createContext
+} from 'react';
+import {
+    Route,
+    BrowserRouter,
+    Routes,
+    Link
+} from "react-router-dom";
+import {
+    createTheme,
+    ThemeProvider,
+    Box,
+    CircularProgress,
+    Backdrop,
+    Tabs,
+    Tab,
+    SvgIcon
+} from '@mui/material';
 import { io } from 'socket.io-client';
+import _ from 'lodash';
 
 import FeaturesApi from './api/Features';
 import GroupsApi from './api/Groups';
 import RulesApi from './api/Rules';
+import LogApi from './api/Log';
 import Alerts from './components/Alerts';
 import SetAlert from './utils/SetAlert';
 
@@ -28,9 +41,9 @@ import FeatureIcon from './assets/icons/component-1-svgrepo-com.svg';
 import './App.css';
 
 export const FeaturesContext = createContext();
-export const AlertsContext = createContext();
 export const GroupsContext = createContext();
 export const RulesContext = createContext();
+export const LogContext = createContext();
 
 const theme = createTheme({
     palette: {
@@ -43,54 +56,45 @@ const routes = ['/home', '/features', '/settings'];
 function App() {
     const [features, setFeatures] = useState([]);
     const [activeRoute, setActiveRoute] = useState();
-    const [alerts, setAlerts] = useState([]);
     const [groups, setGroups] = useState([]);
     const [rules, setRules] = useState([]);
-    const featuresRef = useRef();
-    const ioUpdatesRef = useRef();
+    const [log, setLog] = useState([]);
 
     useEffect(async () => {
         loadFeatures();
         loadGroups();
         loadRules();
-    }, []);
+        loadLog();
 
-    useEffect(() => {
-        featuresRef.current = features;
-        if (!ioUpdatesRef.current && featuresRef.current.length) {
-            initIoUpdates();
-        }
-    }, [features]);
-
-    function initIoUpdates() {
-        ioUpdatesRef.current = io(ApiUrl(), { path: '/updates' });
-        ioUpdatesRef.current.on("feature", (featureUpdate) => {
-            let oldFeature = featuresRef.current.find((feature) => {
-                return feature.key === featureUpdate.key;
-            });
-
-            if (oldFeature) {
-                setFeatures(_.map(featuresRef.current, (feature) => {
-                    if (feature.key === featureUpdate.key) {
-                        return featureUpdate;
+        const socket = io(ApiUrl(), { path: '/updates' });
+        socket.on("feature", (nextFeature) => {
+            setFeatures((prevFeatures) => {
+                let exists;
+                const nextFeatures = prevFeatures.map((prevFeature) => {
+                    if (prevFeature.key === nextFeature.key) {
+                        exists = true;
+                        return nextFeature;
                     } else {
-                        return feature;
+                        return prevFeature;
                     }
-                }));
-            } else {
-                SetAlert(
-                    `Byl nalezen nový prvek ${featureUpdate.key}`,
-                    "success",
-                    alerts,
-                    setAlerts
-                );
-                setFeatures([
-                    ...featuresRef.current,
-                    featureUpdate
-                ])
-            }
-        });
-    }
+                });
+
+                if (!exists) {
+                    nextFeatures.push(nextFeature);
+                }
+
+                return nextFeatures;
+            })
+        })
+        socket.on("log", (logLine) => {
+            setLog((prevLogLines) => {
+                return [
+                    logLine,
+                    ...prevLogLines,
+                ]
+            });
+        })
+    }, []);
 
     async function loadFeatures() {
         try {
@@ -98,9 +102,7 @@ function App() {
         } catch (e) {
             SetAlert(
                 e.message,
-                "error",
-                alerts,
-                setAlerts
+                "error"
             );
         }
     }
@@ -111,9 +113,7 @@ function App() {
         } catch (e) {
             SetAlert(
                 e.message,
-                "error",
-                alerts,
-                setAlerts
+                "error"
             );
         }
     }
@@ -124,9 +124,18 @@ function App() {
         } catch (e) {
             SetAlert(
                 e.message,
-                "error",
-                alerts,
-                setAlerts
+                "error"
+            );
+        }
+    }
+
+    async function loadLog() {
+        try {
+            setLog(await LogApi.get());
+        } catch (e) {
+            SetAlert(
+                e.message,
+                "error"
             );
         }
     }
@@ -144,27 +153,23 @@ function App() {
                     setGroups
                 }}
             >
-                <AlertsContext.Provider
+                <Alerts />
+                <FeaturesContext.Provider
                     value={{
-                        alerts,
-                        setAlerts
+                        features,
+                        setFeatures,
+                        setFeatureConfig: FeaturesApi.setConfig
                     }}
                 >
-                    <FeaturesContext.Provider
+                    <RulesContext.Provider
                         value={{
-                            features,
-                            setFeatures,
-                            setFeatureConfig: FeaturesApi.setConfig
+                            rules,
+                            setRules
                         }}
                     >
-                        <RulesContext.Provider
-                            value={{
-                                rules,
-                                setRules
-                            }}
-                        >
 
-                            <ThemeProvider theme={theme}>
+                        <ThemeProvider theme={theme}>
+                            <LogContext.Provider value={{ log }}>
                                 <Box>
                                     <BrowserRouter>
                                         <Tabs
@@ -239,11 +244,10 @@ function App() {
                                         </Box>
                                     </BrowserRouter>
                                 </Box>
-                            </ThemeProvider>
-                        </RulesContext.Provider>
-                    </FeaturesContext.Provider>
-                    <Alerts />
-                </AlertsContext.Provider>
+                            </LogContext.Provider>
+                        </ThemeProvider>
+                    </RulesContext.Provider>
+                </FeaturesContext.Provider>
             </GroupsContext.Provider>
         );
     } else {

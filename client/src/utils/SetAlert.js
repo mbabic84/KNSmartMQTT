@@ -1,14 +1,10 @@
-import { v4 as uuid } from 'uuid';
-import _ from 'lodash';
+import PubSub from 'pubsub-js';
 
-export default function (message, type, alerts, setAlerts) {
-    setAlerts([
-        ...alerts,
-        {
-            key: uuid(),
-            type,
-            message,
-            created: Date.now()
-        }
-    ])
+import Constants from '../Constants';
+
+export default function (message, type) {
+    PubSub.publish(
+        Constants.pubsub.topics.alert,
+        { message, type }
+    );
 }

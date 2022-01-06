@@ -1,23 +1,25 @@
 import cors from 'cors';
 import express from 'express';
 
-import apiFeatures from "../api/features.js";
-import apiGroups from "../api/groups.js";
-import apiRules from "../api/rules.js";
+import FeaturesApi from "../api/features.js";
+import groupsApi from "../api/groups.js";
+import rulesApi from "../api/rules.js";
+import logApi from '../api/log.js';
 
 async function init(app) {
     app.use(cors());
     app.use(express.json());
 
-    app.get('/features', apiFeatures.get);
-    app.get('/feature/chart', apiFeatures.getChartData);
-    app.put('/feature/config', apiFeatures.setConfig);
-    app.get('/groups', apiGroups.get);
-    app.put('/group', apiGroups.set);
-    app.delete('/group', apiGroups.del);
-    app.get('/rules', apiRules.get);
-    app.put('/rule', apiRules.set);
-    app.delete('/rule', apiRules.del);
+    app.get('/features', FeaturesApi.get);
+    app.get('/feature/chart', FeaturesApi.getChartData);
+    app.put('/feature/config', FeaturesApi.setConfig);
+    app.get('/groups', groupsApi.get);
+    app.put('/group', groupsApi.set);
+    app.delete('/group', groupsApi.del);
+    app.get('/rules', rulesApi.get);
+    app.put('/rule', rulesApi.set);
+    app.delete('/rule', rulesApi.del);
+    app.get('/log', logApi.get);
 }
 
 export default {

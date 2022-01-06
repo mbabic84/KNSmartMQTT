@@ -1,7 +1,6 @@
 import React, {
     useContext,
     useState,
-    useEffect
 } from 'react';
 import {
     Box,
@@ -11,7 +10,6 @@ import {
     Typography,
     TextField,
     FormControlLabel,
-    FormLabel,
     RadioGroup,
     Radio
 } from '@mui/material';

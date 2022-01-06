@@ -1,17 +1,25 @@
-import React, { useContext } from 'react';
-import Box from '@mui/material/Box';
-import Acordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { grey } from '@mui/material/colors';
+import React, {
+    useContext,
+    useState,
+    useEffect
+} from 'react';
+import {
+    Box,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    Typography
+} from '@mui/material';
+import {
+    DragDropContext,
+    Droppable,
+    Draggable
+} from 'react-beautiful-dnd';
 import _ from 'lodash';
 
 import {
     FeaturesContext,
-    GroupsContext,
-    AlertsContext
+    GroupsContext
 } from '../../App';
 
 import GroupsApi from '../../api/Groups';
@@ -21,15 +29,37 @@ import CommonFeature from './Common';
 import GroupRemoveButton from '../../atoms/GroupRemoveButton';
 
 import Constants from '../../Constants';
+import ArrayMove from '../../utils/ArrayMove';
 
 export default function (props) {
     const { features, setFeatures } = useContext(FeaturesContext);
     const { groups, setGroups } = useContext(GroupsContext);
-    const { alerts, setAlerts } = useContext(AlertsContext);
+    const [groupFeatures, setGroupFeatures] = useState([]);
 
-    const groupFeatures = _.filter(features, (feature) => {
-        return feature?.config?.groups?.includes(props.groupKey);
-    });
+    useEffect(() => {
+        const filtered = _.filter(features, (feature) => {
+            return feature.config?.groups?.includes(props.groupKey);
+        });
+
+        let sorted = [];
+        let unsorted = [];
+
+        if (props.config.order) {
+            props.config.order.map((featureKey) => {
+                const feature = _.find(filtered, (feature) => feature.key === featureKey);
+                if (feature) {
+                    sorted.push(feature);
+                }
+            })
+            unsorted = _.filter(filtered, (feature) => {
+                return !_.map(sorted, 'key').includes(feature.key);
+            });
+        } else {
+            unsorted = filtered;
+        }
+
+        setGroupFeatures([...sorted, ...unsorted]);
+    }, [features, groups])
 
     function handleGroupExpandChange(event, expanded) {
         updateGroup(
@@ -44,7 +74,13 @@ export default function (props) {
 
     async function updateGroup(name, index, config) {
         try {
-            const updatedGroup = await GroupsApi.set(props.groupKey, name, index, config);
+            const updatedGroup = await GroupsApi.set({
+                key: props.groupKey,
+                name,
+                index,
+                config
+            });
+
             setGroups(
                 _.map(groups, (group) => {
                     if (group.key === props.groupKey) {
@@ -56,17 +92,13 @@ export default function (props) {
             );
             SetAlert(
                 "Skupina byla aktualizována",
-                "success",
-                alerts,
-                setAlerts
-            )
+                "success"
+            );
         } catch (error) {
             SetAlert(
                 error.message,
-                "error",
-                alerts,
-                setAlerts
-            )
+                "error"
+            );
         }
     }
 
@@ -78,33 +110,59 @@ export default function (props) {
             );
             SetAlert(
                 "Skupina byla smazána",
-                "success",
-                alerts,
-                setAlerts
+                "success"
             )
         } catch (error) {
             SetAlert(
                 error.message,
-                "error",
-                alerts,
-                setAlerts
+                "error"
             )
         }
     }
 
-    function listFeatures() {
-        return _.map(groupFeatures, (feature) => {
-            return <CommonFeature
-                featureKey={feature.key}
-                {...feature}
-                group={{...props}}
-            />
-        })
+    async function onDragEnd(result) {
+        const group = _.find(groups, (group) => group.key === props.groupKey);
+        const order = ArrayMove(
+            groupFeatures,
+            result.source.index,
+            result.destination.index
+        ).map((feature) => feature.key);
+
+        if (group) {
+            try {
+                const patch = {
+                    ...group,
+                    config: {
+                        ...group.config,
+                        order
+                    }
+                };
+                const updated = await GroupsApi.set(patch);
+                setGroups(
+                    groups.map((group) => {
+                        if (group.key === updated.key) {
+                            return updated;
+                        } else {
+                            return group;
+                        }
+                    })
+                )
+                SetAlert(
+                    "Skupina byla aktualizována",
+                    "success"
+                )
+            } catch (e) {
+                SetAlert(
+                    e.message,
+                    "error"
+                )
+            }
+        }
     }
 
     return (
         <Box sx={{ display: 'flex', flexGrow: 1 }}>
-            <Acordion
+            <Accordion
                 disableGutters
                 defaultExpanded={props.config?.expanded}
                 expanded={props.config?.expanded}
@@ -128,11 +186,42 @@ export default function (props) {
                     </Box>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-                        {listFeatures()}
-                    </Box>
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <Droppable droppableId="droppable" direction="horizontal">
+                            {(provided, snapshot) => (
+                                <Box
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    sx={{ display: 'flex' }}
+                                >
+                                    {groupFeatures.map((feature, index) => {
+                                        return (
+                                            <Draggable key={feature.key} draggableId={feature.key} index={index}>
+                                                {(provided, snapshot) => {
+                                                    return (
+                                                        <div
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                        >
+                                                            <CommonFeature
+                                                                {...feature}
+                                                                featureKey={feature.key}
+                                                                group={{ ...props }}
+                                                            />
+                                                        </div>
+                                                    )
+                                                }}
+                                            </Draggable>
+                                        )
+                                    })}
+                                    {provided.placeholder}
+                                </Box>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
                 </AccordionDetails>
-            </Acordion>
+            </Accordion>
         </Box>
     )
 }

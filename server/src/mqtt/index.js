@@ -3,8 +3,7 @@ import mqttDevices from './devices.js';
 import serverConfig from '../config/server.js';
 import Config from '../config/index.js';
 import pgDevices from '../pg/devices.js';
-
-import getStartDelay from '../../utils/getStartDelay.js';
+import log from '../utils/log.js';
 
 let client;
 let deviceTopics = [];
@@ -16,7 +15,7 @@ async function subscribeDevice(topic, client) {
         deviceTopics.push(topic);
         await mqttPromise
             .subscribe(topic, client)
-            .finally(() => console.log(`Subscribed to ${topic}`));
+            .finally(() => log(`Subscribed to ${topic}`));
     }
 }
 
@@ -72,7 +71,7 @@ async function loop() {
             const devices = await pgDevices.get();
             requestMessageFromDevices(devices);
         } else {
-            console.warn("Configuration mqtt.allowGet is disabled or missing!");
+            log.warn("Configuration mqtt.allowGet is disabled or missing!");
         }
     }
 }
@@ -119,7 +118,7 @@ async function publish(topic, message) {
 async function init() {
     client = await mqttPromise
         .connect(serverConfig.mqtt)
-        .finally(() => console.log("Connected to MQTT"));
+        .finally(() => log("Connected to MQTT"));
 
     client.on("message", async (topic, message) => {
         if (topic === "zigbee2mqtt/bridge/devices") {
@@ -133,15 +132,15 @@ async function init() {
 
     await mqttPromise
         .subscribe("zigbee2mqtt/bridge/devices", client)
-        .finally(() => console.log("Subscribed to zigbee2mqtt/bridge/devices!"));
+        .finally(() => log("Subscribed to zigbee2mqtt/bridge/devices!"));
 
     await mqttPromise
         .subscribe("kn2mqtt/devices", client)
-        .finally(() => console.log("Subscribed to kn2mqtt/devices!"));
+        .finally(() => log("Subscribed to kn2mqtt/devices!"));
 
     await mqttPromise
         .publish("kn2mqtt/devices/ping", "", client)
-        .finally(() => console.log("KN2Mqtt devices pinged!"));
+        .finally(() => log("KN2Mqtt devices pinged!"));
 
     setInterval(() => {
         loop();

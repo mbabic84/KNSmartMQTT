@@ -40,7 +40,7 @@ export default {
             }
         },
         mqtt: {
-            allowGet: false,
+            allowGet: true,
             intervals: {
                 get: 900
             }

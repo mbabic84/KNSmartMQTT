@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+    useState,
+    useEffect,
+    useContext
+} from 'react';
 import Backdrop from '@mui/material/Backdrop';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
@@ -23,12 +27,23 @@ import FeaturesApi from '../api/Features';
 
 import NumericContent from './features/NumericContent';
 
+import { RulesContext, FeaturesContext } from '../App';
+
 export default function (props) {
     const [chartData, setChartData] = useState([]);
+    const { rules, setRules } = useContext(RulesContext);
+    const { features, setFeatures } = useContext(FeaturesContext);
+    const [featureRules, setFeatureRules] = useState([]);
 
     useEffect(() => {
         getChartData();
     }, [props.updated])
+
+    useEffect(() => {
+        setFeatureRules(() => {
+            return _.filter(rules, (rule) => rule.current === props.featureKey)
+        })
+    }, [rules])
 
     async function getChartData() {
         try {
@@ -82,6 +97,33 @@ export default function (props) {
         )
     }
 
+    function referenceLines() {
+        const lines = [
+            <ReferenceLine
+                key="value"
+                y={Number(props.value)}
+                stroke={Constants.colors.charts.reference}
+                strokeDasharray="2 2"
+            />
+        ];
+
+        featureRules.map((rule) => {
+            const setpointFeature = _.find(features, (feature) => feature.key === rule.setpoint);
+            if (setpointFeature) {
+                lines.push(
+                    <ReferenceLine
+                        key={setpointFeature.key}
+                        y={Number(setpointFeature.value)}
+                        stroke={Constants.colors.type.setpoint.primary}
+                        strokeDasharray="3 3"
+                    />
+                )
+            }
+        })
+
+        return lines;
+    }
+
     function customYAxisTick({ x, y, stroke, payload }) {
         return (
             <g transform={`translate(${x},${y})`}>
@@ -132,17 +174,13 @@ export default function (props) {
                                 cursor={false}
                                 content={customTooltip}
                             />
-                            <ReferenceLine
-                                y={Number(props.value)}
-                                stroke={Constants.colors.charts.reference}
-                                strokeDasharray="2 2"
-                            />
+                            {referenceLines()}
                             <Line
                                 dot={false}
                                 dataKey='value'
                                 stroke={Constants.colors.type[props.type].primary || Constants.colors.default.primary}
                                 strokeWidth={2}
-                                type='monotone'
+                                type={props.type === "relay" ? 'linear' : 'monotone'}
                             />
                         </LineChart>
                     </ResponsiveContainer>

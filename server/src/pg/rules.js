@@ -1,6 +1,6 @@
 import pgPool from './pool.js';
 
-async function get() {
+async function get(type) {
     const pgResult = await pgPool()
         .query(
             `SELECT 
@@ -26,7 +26,7 @@ async function get() {
                 "devices" AS "fspd" ON "fsp"."deviceKey" = "fspd"."key"
             LEFT JOIN
                 "devices" AS "fhd" ON "fh"."deviceKey" = "fhd"."key"
-            WHERE "r"."active" IS TRUE`
+            WHERE "r"."active" IS TRUE AND "r"."type" = '${type}'`
         )
 
     return pgResult.rows;
@@ -39,8 +39,12 @@ async function getSimple() {
     return pgResult.rows;
 }
 
-async function set({ key, type, current, setpoint, handler, active, config = {} }) {
+async function set({ key, type, current = null, setpoint = null, handler = null, active = false, config = {} }) {
     config = JSON.stringify(config);
+
+    current = current === null ? null : `'${current}'`;
+    setpoint = setpoint === null ? null : `'${setpoint}'`;
+    handler = handler === null ? null : `'${handler}'`;
 
     const pgResult = await pgPool()
         .query(
@@ -55,16 +59,16 @@ async function set({ key, type, current, setpoint, handler, active, config = {} 
             ) VALUES (
                 '${key}',
                 '${type}',
-                '${current}',
-                '${setpoint}',
-                '${handler}',
+                ${current},
+                ${setpoint},
+                ${handler},
                 ${active},
                 '${config}'
             ) ON CONFLICT (key) DO UPDATE SET
                 "type" = '${type}',
-                "current" = '${current}',
-                "setpoint" = '${setpoint}',
-                "handler" = '${handler}',
+                "current" = ${current},
+                "setpoint" = ${setpoint},
+                "handler" = ${handler},
                 "active" = ${active},
                 "config" = "rules"."config" || '${config}'::JSONB
             RETURNING *`

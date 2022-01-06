@@ -9,7 +9,7 @@ async function getAll() {
     return response.data;
 }
 
-async function set(key, name, index = 0, config = { expanded: true }) {
+async function set({ key, name, index = 0, config = { expanded: true } }) {
     const response = await axios
         .put(
             `${ApiUrl()}/group`,

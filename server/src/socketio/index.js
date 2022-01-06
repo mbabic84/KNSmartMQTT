@@ -17,10 +17,21 @@ async function init(server) {
 }
 
 async function emitFeature(feature) {
-    io.to("updates").emit("feature", feature);
+    emit("feature", feature);
+}
+
+function emitLog(log) {
+    emit("log", log);
+}
+
+function emit(type, payload) {
+    if (io) {
+        io.to("updates").emit(type, payload);
+    }
 }
 
 export default {
     init,
-    emitFeature
+    emitFeature,
+    emitLog
 }

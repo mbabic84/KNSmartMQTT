@@ -6,6 +6,7 @@ import history from './tables/history.js';
 import rules from './tables/rules.js';
 import configuration from './tables/configuration.js';
 import groups from './tables/groups.js';
+import log from './tables/log.js';
 
 async function init() {
     let queries = [];
@@ -18,6 +19,7 @@ async function init() {
     queries = queries.concat(rules);
     queries = queries.concat(configuration);
     queries = queries.concat(groups);
+    queries = queries.concat(log);
 
     queries.push("COMMIT");
 

@@ -23,6 +23,7 @@ function Feature(props) {
             return (
                 <Card
                     sx={{ display: 'flex', flexDirection: 'column' }}
+                    key={deviceKey}
                 >
                     <Typography
                         variant='h6'

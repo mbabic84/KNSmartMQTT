@@ -1,11 +1,48 @@
 import { colors } from '@mui/material'
 
 export default {
+    pubsub: {
+        topics: {
+            alert: "alert"
+        }
+    },
     rules: {
         types: {
-            "heater": {
+            heater: {
                 name: "Vytápění",
-                description: "Řídí spínání kotle podle nastavené teploty"
+                description: "Řídí vytápění podle nastavené hodnoty",
+                features: [
+                    "temperature"
+                ]
+            },
+            cooler: {
+                name: "Chlazení",
+                description: "Řídí chlazení jednotky podle nastavené hodnoty",
+                features: [
+                    "temperature"
+                ]
+            },
+            fan: {
+                name: "Ventilace",
+                description: "Řídí ventilaci podle nastavené hodnoty",
+                features: [
+                    "temperature",
+                    "humidity"
+                ]
+            },
+            timer: {
+                name: "Časovač",
+                description: "Spíná podle nastaveného času",
+                features: [
+                    "relay"
+                ]
+            },
+            interval: {
+                name: "Intervalový časovač",
+                description: "Spíná podle nastaveného času a intervalu",
+                features: [
+                    "relay"
+                ]
             }
         }
     },

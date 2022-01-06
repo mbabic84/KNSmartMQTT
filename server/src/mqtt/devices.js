@@ -1,6 +1,7 @@
 import pgDevices from '../pg/devices.js';
 import pgFeatures from '../pg/features.js';
-import heaterControl from '../control/heater/index.js';
+import heaterControl from '../control/heater.js';
+import log from '../utils/log.js';
 
 const knownZigbeeDevices = {
     zbtrv: {
@@ -42,7 +43,7 @@ async function addZigBee(device) {
 
     if (zigBeeDevice) {
         const d = await pgDevices.set(zigBeeDevice);
-        console.log(`Device ${d.key} was saved!`);
+        log(`Device ${d.key} was saved!`);
 
         return d;
     }
@@ -62,7 +63,7 @@ function getKnDevice(device) {
 async function addKN(device) {
     const d = await pgDevices.set(getKnDevice(device));
 
-    console.log(`Device ${d.key} was saved!`);
+    log(`Device ${d.key} was saved!`);
 
     return d;
 }

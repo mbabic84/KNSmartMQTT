@@ -9,14 +9,13 @@ import {
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import { GroupsContext, AlertsContext } from '../../App';
+import { GroupsContext } from '../../App';
 
 import GroupsApi from '../../api/Groups';
 import SetAlert from '../../utils/SetAlert';
 
 export default function (props) {
     const { groups, setGroups } = useContext(GroupsContext);
-    const { alerts, setAlerts } = useContext(AlertsContext);
     const [key, setKey] = useState(uuid());
     const [name, setName] = useState("");
     const [index, setIndex] = useState(0);
@@ -24,31 +23,27 @@ export default function (props) {
     async function save() {
         if (name) {
             try {
-                const newGroup = await GroupsApi.set(
+                const newGroup = await GroupsApi.set({
                     key,
                     name,
                     index
-                )
-    
+                })
+
                 setGroups([
                     ...groups,
                     newGroup
                 ])
-                
+
                 SetAlert(
                     "Group was successfully created",
-                    "success",
-                    alerts,
-                    setAlerts
+                    "success"
                 );
 
                 props.onClose();
             } catch (e) {
                 SetAlert(
                     e.message,
-                    "error",
-                    alerts,
-                    setAlerts
+                    "error"
                 );
             }
         }

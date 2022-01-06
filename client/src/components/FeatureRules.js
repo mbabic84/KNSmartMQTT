@@ -1,4 +1,8 @@
-import React, { useContext } from 'react';
+import React, {
+    useContext,
+    useState,
+    useEffect
+} from 'react';
 import {
     Container,
     Box,
@@ -12,10 +16,12 @@ import {
 } from '@mui/material';
 import { v4 as uuid } from 'uuid';
 
-import { RulesContext, AlertsContext } from '../App';
+import { RulesContext } from '../App';
 
 import AddButton from '../atoms/AddButton';
 import FeatureRuleHeater from './FeatureRuleHeater';
+import FeatureRuleTimer from './FeatureRuleTimer';
+import FeatureRuleInterval from './FeatureRuleInterval';
 import RulesApi from '../api/Rules';
 import SetAlert from '../utils/SetAlert';
 
@@ -23,49 +29,61 @@ import Constants from '../Constants';
 
 export default function (props) {
     const { rules, setRules } = useContext(RulesContext);
-    const { alerts, setAlerts } = useContext(AlertsContext);
+    const [featureRules, setFeatureRules] = useState([]);
 
-    function addNewRule() {
-        setRules([
-            ...rules,
-            {
-                key: uuid(),
-                current: props.featureKey
-            }
-        ])
+    useEffect(() => {
+        setFeatureRules(() => {
+            return _.filter(rules, (rule) => {
+                return rule.current === props.featureKey
+                    || (
+                        !rule.current
+                        && rule.handler
+                        && props.type === "relay"
+                        && rule.handler === props.featureKey
+                    );
+            })
+        })
+    }, [rules])
+
+    function addRule() {
+        setRules((prevRules) => {
+            return [
+                ...prevRules,
+                {
+                    key: uuid(),
+                    current: props.type !== "relay" ? props.featureKey : null,
+                    setpoint: null,
+                    handler: props.type === "relay" ? props.featureKey : null
+                }
+            ]
+        })
     }
 
     async function save(ruleKey) {
-        const rule = rules.find((rule) => rule.key === ruleKey);
+        const rule = featureRules.find((rule) => rule.key === ruleKey);
         if (
             rule
-            && rule.setpoint
-            && rule.handler
+            && rule.type
         ) {
             try {
                 let set = await RulesApi.set(rule);
-                setRules(
-                    rules.map((rule) => {
-                        if (set.key === ruleKey) {
+                setRules((prevRules) => {
+                    return prevRules.map((rule) => {
+                        if (set.key === rule.key) {
                             return set;
                         } else {
                             return rule;
                         }
                     })
-                )
+                });
                 SetAlert(
                     "Pravidlo bylo úspěšně uloženo",
-                    "success",
-                    alerts,
-                    setAlerts
+                    "success"
                 )
             } catch (error) {
                 SetAlert(
                     error.message,
-                    "error",
-                    alerts,
-                    setAlerts
-                )
+                    "error")
             }
 
         }
@@ -78,17 +96,20 @@ export default function (props) {
             await RulesApi.del(rule.key);
         }
 
-        setRules(
-            rules
+        setRules((prevRules) => {
+            return prevRules
                 .filter((rule) => {
                     return rule.key !== ruleKey;
                 })
-        )
+        })
     }
 
     function typeItems(ruleKey) {
         return Object
             .entries(Constants.rules.types)
+            .filter(([type, rule]) => {
+                return rule.features.includes(props.type);
+            })
             .map(([type, { name, description }]) => {
                 return (
                     <MenuItem key={`${ruleKey}#${type}`} value={type}>
@@ -114,7 +135,22 @@ export default function (props) {
             case "heater":
                 return (
                     <FeatureRuleHeater
-                        key={rule.key}
+                        ruleKey={rule.key}
+                        {...rule}
+                        onChange={onRuleChange}
+                    />
+                )
+            case "timer":
+                return (
+                    <FeatureRuleTimer
+                        ruleKey={rule.key}
+                        {...rule}
+                        onChange={onRuleChange}
+                    />
+                )
+            case "interval":
+                return (
+                    <FeatureRuleInterval
                         ruleKey={rule.key}
                         {...rule}
                         onChange={onRuleChange}
@@ -124,24 +160,26 @@ export default function (props) {
     }
 
     function onRuleChange(ruleKey, property, value) {
-        setRules(rules.map((rule) => {
-            if (rule.key === ruleKey && property === "type" && value === "") {
-                return {
-                    key: rule.key
+        setFeatureRules((prevFeatureRules) => {
+            return prevFeatureRules.map((rule) => {
+                if (rule.key === ruleKey && property === "type" && value === "") {
+                    return {
+                        key: rule.key
+                    }
+                } else if (rule.key === ruleKey) {
+                    return {
+                        ...rule,
+                        [property]: value
+                    }
+                } else {
+                    return rule;
                 }
-            } else if (rule.key === ruleKey) {
-                return {
-                    ...rule,
-                    [property]: value
-                }
-            } else {
-                return rule;
-            }
-        }))
+            })
+        })
     }
 
     function listRules() {
-        return rules.map((rule) => {
+        return featureRules.map((rule) => {
             return (
                 <Card
                     key={rule.key}
@@ -223,7 +261,7 @@ export default function (props) {
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center' }}
                 >
-                    <AddButton onClick={addNewRule} />
+                    <AddButton onClick={addRule} />
                 </Box>
             </Container>
         </Dialog>

@@ -1,19 +1,18 @@
-import Backdrop from '@mui/material/Backdrop';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import React, { useContext, useState, useEffect } from 'react';
-import SvgIcon from '@mui/material/SvgIcon';
-import IconButton from '@mui/material/IconButton';
-import Autocomplete from '@mui/material/Autocomplete';
-import { grey, yellow } from '@mui/material/colors';
+import React, { useContext, useState } from 'react';
+import {
+    Dialog,
+    Container,
+    TextField,
+    Box,
+    Chip,
+    Autocomplete,
+    Button,
+    Card
+} from '@mui/material'
 import _ from 'lodash';
 
 import FeaturesApi from '../api/Features';
-
-import SaveIcon from '../assets/icons/save-svgrepo-com.svg';
-import DiscardIcon from '../assets/icons/cancel-cross-svgrepo-com.svg';
+import SetAlert from '../utils/SetAlert';
 
 import { FeaturesContext, GroupsContext } from '../App'
 
@@ -37,13 +36,18 @@ export default function (props) {
                 }
             )
 
-            await setFeatures(_.map(features, (feature) => {
+            setFeatures(_.map(features, (feature) => {
                 if (feature.key === props.featureKey) {
                     return updatedFeature;
                 } else {
                     return feature;
                 }
             }));
+
+            SetAlert(
+                "Nastavení úspěšně uloženo",
+                "success"
+            )
 
             props.onClose();
         }
@@ -74,12 +78,13 @@ export default function (props) {
     }
 
     return (
-        <Backdrop
+        <Dialog
             open={true}
-            sx={{
-                zIndex: 1
-            }}
+            sx={{ zIndex: 1 }}
             onClick={handleDiscard}
+            scroll="body"
+            maxWidth="sm"
+            fullWidth={true}
         >
             <Container
                 sx={{
@@ -89,11 +94,18 @@ export default function (props) {
                     paddingTop: 3,
                     paddingBottom: 3
                 }}
-                maxWidth='xs'
+                maxWidth='sm'
                 onClick={(event) => event.stopPropagation()}
             >
-                <Box
-                    sx={{ display: 'flex', gap: 4, flexDirection: 'column' }}
+                <Card
+                    variant='elevation'
+                    sx={{
+                        margin: 1,
+                        padding: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                    }}
                 >
                     <TextField
                         id='key'
@@ -134,32 +146,21 @@ export default function (props) {
                         }}
                         onChange={handleGroupsChange}
                     />
-                </Box>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginTop: 5
-                    }}
-                >
-                    <IconButton onClick={handleSave}>
-                        <SvgIcon
-                            component={SaveIcon}
-                            viewBox='0 0 502 502'
-                            fontSize='inherit'
-                            sx={{ fill: !_.keys(changes).length ? grey[600] : yellow[600] }}
-                        />
-                    </IconButton>
-                    <IconButton onClick={handleDiscard}>
-                        <SvgIcon
-                            component={DiscardIcon}
-                            viewBox='0 0 502 502'
-                            fontSize='inherit'
-                            color='error'
-                        />
-                    </IconButton>
-                </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-around',
+                        }}
+                    >
+                        <Button onClick={handleSave} >
+                            Uložit
+                        </Button>
+                        <Button onClick={handleDiscard} >
+                            Zahodit
+                        </Button>
+                    </Box>
+                </Card>
             </Container>
-        </Backdrop>
+        </Dialog>
     );
 }
