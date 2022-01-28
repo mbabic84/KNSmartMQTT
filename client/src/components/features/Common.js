@@ -14,6 +14,7 @@ import RulesButton from '../../atoms/RulesButton';
 
 import NumericContent from './NumericContent';
 import RelayContent from './RelayContent';
+import BatteryContent from './BatteryContent';
 
 import Constants from '../../Constants';
 
@@ -108,12 +109,18 @@ export default function (props) {
                     />
                 )
             case "rssi":
-            case "battery":
                 return (
                     <NumericContent
                         key={props.featureKey}
                         {...props}
                         unit={Constants.units?.type?.[props.type]}
+                    />
+                )
+            case "battery":
+                return (
+                    <BatteryContent
+                        key={props.featureKey}
+                        {...props}
                     />
                 )
             case "relay":

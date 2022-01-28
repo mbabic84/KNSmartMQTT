@@ -51,8 +51,7 @@ export default {
             temperature: '°C',
             setpoint: '°C',
             humidity: '%',
-            pressure: 'hPa',
-            battery: '%'
+            pressure: 'hPa'
         }
     },
     colors: {

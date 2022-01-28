@@ -16,7 +16,7 @@ export default {
                     };
                 })
         },
-        battery: "battery",
+        battery_low: "battery",
         linkquality: "rssi",
         local_temperature: "temperature",
         current_heating_setpoint: "setpoint"
@@ -42,7 +42,7 @@ export default {
         mqtt: {
             allowGet: true,
             intervals: {
-                get: 900
+                get: 1200
             }
         }
     }

@@ -70,6 +70,7 @@ async function loop() {
         if (loopConfig.allowGet) {
             const devices = await pgDevices.get();
             requestMessageFromDevices(devices);
+            log("Requesting data from devices");
         } else {
             log.warn("Configuration mqtt.allowGet is disabled or missing!");
         }
@@ -91,9 +92,9 @@ async function requestMessageFromDevices(devices) {
 
 async function requestMessaeFromZigBeeTrv(device) {
     await mqttPromise.publish(
-        `zigbee2mqtt/${device.key}/get`,
+        `zigbee2mqtt/${device.key}/set`,
         JSON.stringify({
-            "local_temperature": ""
+            "online": "ON"
         }),
         client
     )

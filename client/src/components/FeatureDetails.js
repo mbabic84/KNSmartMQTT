@@ -163,7 +163,7 @@ export default function (props) {
                             />
                             <YAxis
                                 dataKey='value'
-                                domain={['dataMin - 3', 'dataMax + 3']}
+                                domain={['dataMin - 5', 'dataMax + 5']}
                                 hide={true}
                                 axisLine={false}
                                 tickLine={false}

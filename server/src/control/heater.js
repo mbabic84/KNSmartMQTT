@@ -80,7 +80,7 @@ async function heat(deviceKey) {
 
     setTimeout(() => {
         locked = false;
-    }, sampleTime - (15 * 1000));
+    }, output * 1000);
 }
 
 export default {

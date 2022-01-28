@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:dev": "webpack --mode='development'",
     "build": "webpack --mode='production'",
-    "start": "webpack-dev-server --mode='development'",
+    "start:watch": "webpack-dev-server --mode='development'",
     "start:prod": "webpack-dev-server --mode='production'"
   },
   "author": "Martin Babič",
