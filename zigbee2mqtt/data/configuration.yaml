@@ -5,7 +5,10 @@ mqtt:
   server: mqtt://10.0.0.113
 serial:
   port: /dev/ttyUSB0
-advanced:
-  log_level: debug
 device_options:
   debounce: 10
+devices:
+  '0x847127fffe04deb8':
+    friendly_name: '0x847127fffe04deb8'
+  '0x847127fffe21ab4b':
+    friendly_name: '0x847127fffe21ab4b'
