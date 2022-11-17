@@ -4,8 +4,7 @@ import { PIDController } from '@mariusrumpf/pid-controller';
 import Config from '../config/index.js';
 import mqtt from '../mqtt/index.js';
 import log from '../utils/log.js';
-
-import pgRules from '../pg/rules.js';
+import { warn } from '../utils/log.js';
 
 import Constants from "../Constants.js";
 
@@ -13,25 +12,14 @@ const pid = new PIDController(Constants.defaults.heater.pid);
 let lastPidUpdate;
 let locked;
 
-async function getRules() {
-    return pgRules.get("heater");
-}
-
-async function getRule() {
-    const control = await getRules();
-    const rules = _.sortBy(control, ['current.value']);
-
-    return _.last(rules);
-}
-
-async function heat(deviceKey) {
+async function heat(deviceKey, rule) {
     if (locked) {
+        warn(`Device ${deviceKey} was skipped. Heating process already locked!`);
         return;
     }
 
-    const rule = await getRule();
-
-    if (!rule || rule.current.device.key != deviceKey) {
+    if (!rule || rule.current.device.key !== deviceKey) {
+        warn(`Device ${deviceKey} was skipped. No rules!`);
         return;
     }
 
@@ -66,7 +54,7 @@ async function heat(deviceKey) {
         }
     });
 
-    log(target, input, output, sampleTime);
+    log(deviceKey, input, target, output, sampleTime);
 
     if (output < config.limit.min) {
         locked = false;

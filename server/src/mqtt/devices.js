@@ -1,6 +1,6 @@
 import pgDevices from '../pg/devices.js';
 import pgFeatures from '../pg/features.js';
-import heaterControl from '../control/heater.js';
+import heaterQueue from '../control/queue.js';
 import log from '../utils/log.js';
 
 const knownZigbeeDevices = {
@@ -72,7 +72,7 @@ async function saveReport(topic, mqttMessage) {
     const deviceKey = topic.split("/")[1];
     const report = JSON.parse(mqttMessage);
     await pgFeatures.saveReport(report, deviceKey);
-    await heaterControl.heat(deviceKey);
+    heaterQueue.add(deviceKey, report);
 }
 
 export default {
