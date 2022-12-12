@@ -4,7 +4,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 
 import { grey } from '@mui/material/colors';
 
-import AddIcon from '../assets/icons/add-svgrepo-com.svg';
+import { ReactComponent as AddIcon } from '../../public/static/icons/add-svgrepo-com.svg';
 
 export default function (props) {
     return (

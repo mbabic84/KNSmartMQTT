@@ -3,11 +3,13 @@ import SvgIcon from '@mui/material/SvgIcon';
 import IconButton from '@mui/material/IconButton';
 import { grey } from '@mui/material/colors';
 
-import SettingsIcon from '../assets/icons/settings-svgrepo-com.svg';
+import {ReactComponent as SettingsIcon} from '../../public/static/icons/settings-svgrepo-com.svg';
 
 export default function(props) {
     return (
-        <IconButton size="small" onClick={() => {
+        <IconButton size="small" onClick={(event) => {
+            event.stopPropagation();
+
             if (props.onClick) {
                 props.onClick();
             }

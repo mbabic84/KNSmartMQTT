@@ -15,6 +15,7 @@ import {
     Dialog
 } from '@mui/material';
 import { v4 as uuid } from 'uuid';
+import moment from 'moment';
 
 import { RulesContext } from '../App';
 
@@ -33,15 +34,40 @@ export default function (props) {
 
     useEffect(() => {
         setFeatureRules(() => {
-            return _.filter(rules, (rule) => {
+            let filtered = _.filter(rules, (rule) => {
                 return rule.current === props.featureKey
                     || (
                         !rule.current
                         && rule.handler
-                        && props.type === "relay"
+                        && (props.type === "relay"
+                            || props.type === "state")
                         && rule.handler === props.featureKey
                     );
+            });
+
+            let sorted = filtered.sort((a, b) => {
+                if (
+                    a.config
+                    && b.config
+                    && a.config.start
+                    && b.config.start
+                    && moment.utc(a.config.start).isBefore(moment.utc(b.config.start))
+                ) {
+                    return -1;
+                } else if (
+                    a.config
+                    && b.config
+                    && a.config.start
+                    && b.config.start
+                    && moment.utc(a.config.start).isAfter(moment.utc(b.config.start))
+                ) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             })
+
+            return sorted;
         })
     }, [rules])
 
@@ -51,9 +77,9 @@ export default function (props) {
                 ...prevRules,
                 {
                     key: uuid(),
-                    current: props.type !== "relay" ? props.featureKey : null,
+                    current: props.type !== "relay" && props.type !== "state" ? props.featureKey : null,
                     setpoint: null,
-                    handler: props.type === "relay" ? props.featureKey : null
+                    handler: props.type === "relay" || props.type === "state" ? props.featureKey : null
                 }
             ]
         })

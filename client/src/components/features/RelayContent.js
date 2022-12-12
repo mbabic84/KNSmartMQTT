@@ -10,11 +10,21 @@ export default function (props) {
     function state() {
         if (props.value === "1") {
             return (
-                <Avatar sx={{ bgcolor: green[800], width: indicatorSize, height: indicatorSize }}>ON</Avatar>
+                <Avatar sx={{
+                    bgcolor: green[800],
+                    width: indicatorSize,
+                    height: indicatorSize,
+                    cursor: 'pointer'
+                }}>ON</Avatar>
             )
         } else {
             return (
-                <Avatar sx={{ bgcolor: red[800], width: indicatorSize, height: indicatorSize }}>OFF</Avatar>
+                <Avatar sx={{
+                    bgcolor: red[800],
+                    width: indicatorSize,
+                    height: indicatorSize,
+                    cursor: 'pointer'
+                }}>OFF</Avatar>
             )
         }
     }

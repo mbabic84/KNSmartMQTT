@@ -3,7 +3,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import IconButton from '@mui/material/IconButton';
 import { grey } from '@mui/material/colors';
 
-import DetailsIcon from '../assets/icons/magnifier-hand-drawn-searching-tool-svgrepo-com.svg';
+import {ReactComponent as DetailsIcon} from '../../public/static/icons/magnifier-hand-drawn-searching-tool-svgrepo-com.svg'
 
 export default function(props) {
     return (

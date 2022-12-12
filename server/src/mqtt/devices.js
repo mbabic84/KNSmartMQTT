@@ -2,11 +2,24 @@ import pgDevices from '../pg/devices.js';
 import pgFeatures from '../pg/features.js';
 import heaterQueue from '../control/queue.js';
 import log from '../utils/log.js';
+import { warn } from '../utils/log.js';
 
 const knownZigbeeDevices = {
     zbtrv: {
         model_id: "TS0601",
         manufacturer: "_TZE200_husqqvux"
+    },
+    zbPlug: {
+        model_id: "Plug Value",
+        manufacturer: "LEDVANCE"
+    },
+    zbRealy: {
+        model_id: "BASICZBR3",
+        manufacturer: "SONOFF"
+    },
+    zbBulb: {
+        model_id: "VIYU-A60-806-CCT-10011723",
+        manufacturer: "HORNBACH Baumarkt AG"
     }
 };
 
@@ -46,6 +59,8 @@ async function addZigBee(device) {
         log(`Device ${d.key} was saved!`);
 
         return d;
+    } else {
+        warn(`Unknown ZigBee device ${device.ieee_address} | Type: "${device.type}" | ModelID: "${device.model_id}" | Manufacturer: "${device.manufacturer}"`);
     }
 }
 

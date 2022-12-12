@@ -12,3 +12,23 @@ devices:
     friendly_name: '0x847127fffe04deb8'
   '0x847127fffe21ab4b':
     friendly_name: '0x847127fffe21ab4b'
+  '0x60a423fffe8038e0':
+    friendly_name: '0x60a423fffe8038e0'
+    debounce: 0
+  '0x0c4314fffe61ad1c':
+    friendly_name: '0x0c4314fffe61ad1c'
+  '0x0c4314fffe63b650':
+    friendly_name: '0x0c4314fffe63b650'
+  '0x00124b002343df85':
+    friendly_name: '0x00124b002343df85'
+    debounce: 0
+  '0xf0d1b800001c4d3a':
+    friendly_name: '0xf0d1b800001c4d3a'
+    debounce: 0
+  '0x00158d0006dbfe5b':
+    friendly_name: '0x00158d0006dbfe5b'
+    debounce: 0
+  '0x0c4314fffe17bb9a':
+    friendly_name: '0x0c4314fffe17bb9a'
+  '0x0c4314fffe342154':
+    friendly_name: '0x0c4314fffe342154'

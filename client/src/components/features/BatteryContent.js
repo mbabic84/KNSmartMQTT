@@ -7,9 +7,8 @@ import Box from '@mui/material/Box';
 const indicatorSize = 72;
 
 export default function (props) {
-    console.log(props.value);
     function state() {
-        if (props.value === "false" || props.value === "100") {
+        if (props.value === "1") {
             return (
                 <Avatar
                     sx={{

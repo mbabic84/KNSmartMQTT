@@ -81,16 +81,31 @@ async function requestMessageFromDevices(devices) {
     for (const device of devices) {
         switch (device.type) {
             case "zbtrv":
-                await requestMessaeFromZigBeeTrv(device);
+                await requestStateFromZigBeeTrv(device);
                 break;
             case "nodemcu":
-                await requestMessageFromNodeMcu(device);
+                await requestStateFromNodeMcu(device);
+                break;
+            case "zbPlug":
+            case "zbBulb":
+            case "zbRealy":
+                await requestStateFromZigBee(device);
                 break;
         }
     }
 }
 
-async function requestMessaeFromZigBeeTrv(device) {
+async function requestStateFromZigBee(device) {
+    await mqttPromise.publish(
+        `zigbee2mqtt/${device.key}/get`,
+        JSON.stringify({
+            "state": ""
+        }),
+        client
+    )
+}
+
+async function requestStateFromZigBeeTrv(device) {
     await mqttPromise.publish(
         `zigbee2mqtt/${device.key}/set`,
         JSON.stringify({
@@ -100,7 +115,7 @@ async function requestMessaeFromZigBeeTrv(device) {
     )
 }
 
-async function requestMessageFromNodeMcu(device) {
+async function requestStateFromNodeMcu(device) {
     await mqttPromise.publish(
         `kn2mqtt/${device.key}/get`,
         "",
@@ -141,7 +156,7 @@ async function init() {
 
     await mqttPromise
         .publish("kn2mqtt/devices/ping", "", client)
-        .finally(() => log("KN2Mqtt devices pinged!"));
+        .finally(() => log("KN2MQTT devices pinged!"));
 
     setInterval(() => {
         loop();

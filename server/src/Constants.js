@@ -16,10 +16,23 @@ export default {
                     };
                 })
         },
-        battery_low: "battery",
+        battery_low: {
+            type: "battery",
+            transform: (value) => {
+                return value ? 0 : 1;
+            }
+        },
         linkquality: "rssi",
         local_temperature: "temperature",
-        current_heating_setpoint: "setpoint"
+        current_heating_setpoint: "setpoint",
+        state: {
+            type: "state",
+            transform: (value) => {
+                return value === "ON" ? 1 : 0;
+            }
+        },
+        brightness: "brightness",
+        color_temp: "colorTemperature"
     },
     defaults: {
         heater: {

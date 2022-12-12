@@ -1,18 +1,37 @@
 version: '3'
 services:
   zigbee2mqtt:
-      image: koenkk/zigbee2mqtt:latest-dev
-      volumes:
-        - ./zigbee2mqtt/data:/app/data
-      devices:
-        - /dev/ttyUSB0:/dev/ttyUSB0
-      restart: always
-      network_mode: host
+    image: koenkk/zigbee2mqtt:latest-dev
+    volumes:
+      - ./zigbee2mqtt/data:/app/data
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    restart: always
+    network_mode: host
+    environment:
+      - TZ=Europe/Prague
   knsmart-server:
     build: ./server
     restart: always
     network_mode: host
+    environment:
+        - TZ=Europe/Prague
   knsmart-client:
     build: ./client
     restart: always
     network_mode: host
+    environment:
+        - TZ=Europe/Prague
+  knsmart-database:
+    image: postgres:14
+    environment:
+      - TZ=Europe/Prague
+      - POSTGRES_PASSWORD=postgres
+      - PG_DATA=/var/lib/postgresql/data/pgdata
+    volumes: 
+      - knsmart-database:/var/lib/postgresql/data
+    ports:
+      - "5442:5432"
+    restart: always
+volumes:
+  knsmart-database:

@@ -86,6 +86,7 @@ export default function (props) {
             case "pressure":
             case "humidity":
             case "relay":
+            case "state":
                 return (
                     <RulesButton
                         onClick={handleRulesClick}
@@ -124,6 +125,7 @@ export default function (props) {
                     />
                 )
             case "relay":
+            case "state":
                 return (
                     <RelayContent key={props.featureKey} {...props} />
                 )

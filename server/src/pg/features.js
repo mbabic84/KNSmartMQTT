@@ -78,6 +78,22 @@ async function saveReport(report, deviceKey) {
 
                         }
                     })
+            } else if (
+                typeof Constants.featureMap[property] === "object"
+                && Constants.featureMap[property].type
+                && Constants.featureMap[property].transform
+            ) {
+                const feature = await set({
+                    key: `${deviceKey}/${Constants.featureMap[property].type}`,
+                    deviceKey,
+                    type: Constants.featureMap[property].type,
+                    value: Constants.featureMap[property].transform(value)
+                });
+                await pgHistory.set({
+                    featureKey: `${deviceKey}/${Constants.featureMap[property].type}`,
+                    value: Constants.featureMap[property].transform(value)
+                });
+                socketio.emitFeature(feature);
             } else {
                 const feature = await set({
                     key: `${deviceKey}/${Constants.featureMap[property]}`,

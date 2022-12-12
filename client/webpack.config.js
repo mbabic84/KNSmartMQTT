@@ -2,17 +2,21 @@ const path = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+        index: './src/index.js'
+    },
     output: {
-        filename: 'main.js',
+        filename: '[name].js',
+        chunkFilename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
+        publicPath: 'auto'
     },
     plugins: [
         new HtmlWebPackPlugin({
             template: path.resolve(__dirname, 'public/index.html'),
             filename: 'index.html',
             publicPath: '/',
-            favicon: "./src/assets/icons/rabbit-svgrepo-com.svg"
+            favicon: "./public/static/icons/rabbit-svgrepo-com.svg"
         })
     ],
     devServer: {
@@ -32,8 +36,13 @@ module.exports = {
                 }
             },
             {
+                test: /\.js$/,
+                enforce: "pre",
+                use: ["source-map-loader"]
+            },
+            {
                 test: /\.svg$/,
-                use: ['@svgr/webpack'],
+                use: ['@svgr/webpack', 'url-loader']
             }
         ]
     }

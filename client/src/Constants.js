@@ -34,14 +34,16 @@ export default {
                 name: "Časovač",
                 description: "Spíná podle nastaveného času",
                 features: [
-                    "relay"
+                    "relay",
+                    "state"
                 ]
             },
             interval: {
                 name: "Intervalový časovač",
                 description: "Spíná podle nastaveného času a intervalu",
                 features: [
-                    "relay"
+                    "relay",
+                    "state"
                 ]
             }
         }
@@ -83,7 +85,11 @@ export default {
             rssi: {
                 primary: colors.deepOrange[800],
                 secondary: colors.grey[800]
-            }
+            },
+            state: {
+                main: colors.lime[800],
+                secondary: colors.grey[800]
+            },
         },
         text: {
             primary: colors.blueGrey[100],

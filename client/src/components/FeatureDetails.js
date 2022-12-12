@@ -26,6 +26,9 @@ import Constants from '../Constants';
 import FeaturesApi from '../api/Features';
 
 import NumericContent from './features/NumericContent';
+import BatteryContent from './features/BatteryContent';
+import StringContent from './features/StringContent';
+import RelayContent from './features/RelayContent';
 
 import { RulesContext, FeaturesContext } from '../App';
 
@@ -201,17 +204,31 @@ export default function (props) {
                         decimal
                     />
                 )
-            case "battery":
             case "rssi":
                 return (
                     <NumericContent
-                        unit={Constants.units?.type?.[props.type]}
                         {...props}
-                        decimal
+                    />
+                )
+            case "battery":
+                return (
+                    <BatteryContent
+                        {...props}
+                    />
+                )
+            case "relay":
+            case "state":
+                return (
+                    <RelayContent
+                        {...props}
                     />
                 )
             default:
-                return null;
+                return (
+                    <StringContent
+                        {...props}
+                    />
+                )
         }
     }
 

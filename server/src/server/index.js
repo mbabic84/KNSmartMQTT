@@ -5,6 +5,7 @@ import routes from '../routes/index.js';
 import socketio from '../socketio/index.js';
 import log from '../utils/log.js';
 import intervalControl from '../control/interval.js';
+import timerControl from '../control/timer.js';
 
 import config from '../config/server.js';
 
@@ -26,6 +27,7 @@ async function init() {
     await routes.init(app);
     await socketio.init(server);
     intervalControl.init();
+    timerControl.init();
     await listen();
 }
 

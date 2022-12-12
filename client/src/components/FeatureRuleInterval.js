@@ -11,12 +11,12 @@ import {
     Radio,
     TextField
 } from '@mui/material';
-import AdapterMoment from '@mui/lab/AdapterMoment';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import {
     LocalizationProvider,
     MobileTimePicker,
     MobileDateTimePicker
-} from '@mui/lab';
+} from '@mui/x-date-pickers';
 import moment from 'moment';
 
 import { FeaturesContext } from '../App';
@@ -42,7 +42,6 @@ export default function (props) {
     }
 
     function onTimeChange(type, value) {
-        console.log(type, value);
         switch (type) {
             case "start":
                 setConfig((prev) => {
@@ -75,7 +74,7 @@ export default function (props) {
         <Box
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
-            <LocalizationProvider dateAdapter={AdapterMoment} locale='csLocale'>
+            <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale='csLocale'>
                 <MobileDateTimePicker
                     onChange={(value) => onTimeChange("start", value)}
                     renderInput={(params) => <TextField {...params} />}

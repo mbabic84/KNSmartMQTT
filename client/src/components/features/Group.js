@@ -27,6 +27,7 @@ import SetAlert from '../../utils/SetAlert';
 
 import CommonFeature from './Common';
 import GroupRemoveButton from '../../atoms/GroupRemoveButton';
+import SettingsButton from '../../atoms/SettingsButton';
 
 import Constants from '../../Constants';
 import ArrayMove from '../../utils/ArrayMove';
@@ -182,7 +183,10 @@ export default function (props) {
                         <Typography variant='h6' sx={{ color: Constants.colors.text.primary }}>
                             {props.name}
                         </Typography>
-                        <GroupRemoveButton groupName={props.name} removeGroup={removeGroup} />
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <SettingsButton />
+                            <GroupRemoveButton groupName={props.name} removeGroup={removeGroup} />
+                        </Box>
                     </Box>
                 </AccordionSummary>
                 <AccordionDetails>

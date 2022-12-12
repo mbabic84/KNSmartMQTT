@@ -1,7 +1,8 @@
 import React, {
     useEffect,
     useState,
-    createContext
+    createContext,
+    Suspense
 } from 'react';
 import {
     Route,
@@ -28,15 +29,15 @@ import RulesApi from './api/Rules';
 import LogApi from './api/Log';
 import Alerts from './components/Alerts';
 import SetAlert from './utils/SetAlert';
-
-import FeatureTab from './components/tabs/Feature';
-import SettingsTab from './components/tabs/Settings';
-import FeatureGroups from './components/features/Groups';
 import ApiUrl from './utils/ApiUrl';
 
-import HomeIcon from './assets/icons/home-svgrepo-com.svg';
-import SettingsIcon from './assets/icons/settings-svgrepo-com.svg';
-import FeatureIcon from './assets/icons/component-1-svgrepo-com.svg';
+const FeatureTab = React.lazy(() => import('./components/tabs/Feature'));
+const SettingsTab = React.lazy(() => import('./components/tabs/Settings'));
+const FeatureGroups = React.lazy(() => import('./components/features/Groups'));
+
+import { ReactComponent as HomeIcon } from '../public/static/icons/home-svgrepo-com.svg';
+import { ReactComponent as SettingsIcon } from '../public/static/icons/settings-svgrepo-com.svg';
+import { ReactComponent as FeatureIcon } from '../public/static/icons/component-1-svgrepo-com.svg';
 
 import './App.css';
 
@@ -60,7 +61,7 @@ function App() {
     const [rules, setRules] = useState([]);
     const [log, setLog] = useState([]);
 
-    useEffect(async () => {
+    useEffect(() => {
         loadFeatures();
         loadGroups();
         loadRules();
@@ -216,28 +217,35 @@ function App() {
                                                 <Route
                                                     index
                                                     element={
-                                                        <FeatureGroups />
+                                                        <Suspense fallback={<div></div>}>
+                                                            <FeatureGroups />
+                                                        </Suspense>
                                                     }
                                                 />
                                                 <Route
                                                     path={routes[0]}
                                                     element={
-                                                        <FeatureGroups />
+                                                        <Suspense fallback={<div></div>}>
+                                                            <FeatureGroups />
+                                                        </Suspense>
                                                     }
                                                 />
                                                 <Route
                                                     path={routes[1]}
                                                     element={
-                                                        <FeatureTab
-                                                            features={features}
-                                                        />
+                                                        <Suspense fallback={<div></div>}>
+                                                            <FeatureTab
+                                                                features={features}
+                                                            />
+                                                        </Suspense>
                                                     }
                                                 />
                                                 <Route
                                                     path={routes[2]}
                                                     element={
-                                                        <SettingsTab
-                                                        />
+                                                        <Suspense fallback={<div></div>}>
+                                                            <SettingsTab />
+                                                        </Suspense>
                                                     }
                                                 />
                                             </Routes>

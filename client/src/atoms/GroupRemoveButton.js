@@ -11,7 +11,7 @@ import DialogActions from '@mui/material/DialogActions';
 
 import { grey } from '@mui/material/colors';
 
-import RemoveIcon from '../assets/icons/rubbish-bin-svgrepo-com.svg';
+import {ReactComponent as RemoveIcon} from '../../public/static/icons/rubbish-bin-svgrepo-com.svg';
 
 export default function (props) {
     const [alertActive, setAlertActive] = useState(false);
