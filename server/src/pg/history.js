@@ -24,7 +24,7 @@ async function getForFeature({
     const pgResult = await pgPool()
         .query(
             `SELECT 
-                "value"::real, "created" 
+                "value", "created" 
             FROM 
                 "history" 
             WHERE 

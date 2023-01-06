@@ -26,7 +26,7 @@ export default function (props) {
 
     function setPointItems(ruleKey) {
         return features
-            .filter((feature) => feature.type === "setpoint")
+            .filter((feature) => feature.type === "setpoint" || feature.type === "current_heating_setpoint")
             .map((feature) => {
                 return (
                     <MenuItem key={`${ruleKey}#${feature.key}`} value={feature.key}>

@@ -17,8 +17,8 @@ async function loop() {
 
     let nextTimerState = {};
     rules.forEach((rule) => {
-        const start = moment.utc(moment.utc(rule.config.start).format("HH:mm:ss"), "HH:mm:ss");
-        const end = moment.utc(moment.utc(rule.config.end).format("HH:mm:ss"), "HH:mm:ss");
+        const start = moment.utc(rule.config.start, "HH:mm:ss");
+        const end = moment.utc(rule.config.end, "HH:mm:ss");
 
         if (
             moment().utc().isBetween(start, end, undefined, '[]')
@@ -30,7 +30,7 @@ async function loop() {
         } else {
             if (
                 !nextTimerState[rule.handler.key]
-                || moment.utc(moment.utc(nextTimerState[rule.handler.key].rule.config.end).format("HH:mm:ss"), "HH:mm:ss").isBefore(start)
+                || moment.utc(nextTimerState[rule.handler.key].rule.config.end, "HH:mm:ss").isBefore(start)
             ) {
                 nextTimerState[rule.handler.key] = {
                     active: false,
@@ -40,23 +40,30 @@ async function loop() {
         }
     })
 
+    let stillActiveTimers = [];
     for (const [key, { active, rule }] of Object.entries(nextTimerState)) {
         if (active) {
             if (!activeTimers[key]) {
                 turnOn(rule);
             }
-            activeTimers[key] = true;
+            activeTimers[key] = rule;
+            stillActiveTimers.push(key);
             delete expiredTimers[key];
         } else {
             if (!expiredTimers[key]) {
                 turnOff(rule);
             }
-            expiredTimers[key] = true;
+            expiredTimers[key] = rule;
             delete activeTimers[key];
         }
     }
 
-
+    for (const [key, rule] of Object.entries(activeTimers)) {
+        if (!stillActiveTimers.includes(key)) {
+            turnOff(rule);
+            delete activeTimers[key];
+        }
+    }
 }
 
 function turnOn(rule) {

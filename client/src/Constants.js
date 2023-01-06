@@ -12,14 +12,16 @@ export default {
                 name: "Vytápění",
                 description: "Řídí vytápění podle nastavené hodnoty",
                 features: [
-                    "temperature"
+                    "temperature",
+                    "local_temperature"
                 ]
             },
             cooler: {
                 name: "Chlazení",
                 description: "Řídí chlazení jednotky podle nastavené hodnoty",
                 features: [
-                    "temperature"
+                    "temperature",
+                    "local_temperature"
                 ]
             },
             fan: {
@@ -27,6 +29,7 @@ export default {
                 description: "Řídí ventilaci podle nastavené hodnoty",
                 features: [
                     "temperature",
+                    "local_temperature",
                     "humidity"
                 ]
             },
@@ -51,6 +54,8 @@ export default {
     units: {
         type: {
             temperature: '°C',
+            local_temperature: '°C',
+            current_heating_setpoint: '°C',
             setpoint: '°C',
             humidity: '%',
             pressure: 'hPa'
@@ -62,7 +67,15 @@ export default {
                 primary: colors.red[800],
                 secondary: colors.grey[800]
             },
+            local_temperature: {
+                primary: colors.red[800],
+                secondary: colors.grey[800]
+            },
             setpoint: {
+                primary: colors.lightGreen[800],
+                secondary: colors.grey[800]
+            },
+            current_heating_setpoint: {
                 primary: colors.lightGreen[800],
                 secondary: colors.grey[800]
             },
@@ -82,7 +95,15 @@ export default {
                 primary: colors.brown[400],
                 secondary: colors.grey[800]
             },
+            battery_low: {
+                primary: colors.brown[400],
+                secondary: colors.grey[800]
+            },
             rssi: {
+                primary: colors.deepOrange[800],
+                secondary: colors.grey[800]
+            },
+            linkquality: {
                 primary: colors.deepOrange[800],
                 secondary: colors.grey[800]
             },

@@ -11,6 +11,11 @@ async function get(key) {
     )
 }
 
+async function set({ key, data }) {
+    return pgConfig.set({ key, data });
+}
+
 export default {
-    get
+    get,
+    set
 }

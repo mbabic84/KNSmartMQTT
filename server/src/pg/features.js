@@ -49,7 +49,7 @@ async function setConfig({ key, config = {} }) {
     return pgResult.rows[0];
 }
 
-async function saveReport(report, deviceKey) {
+async function saveReport(report, deviceKey, device) {
     for (const [property, value] of Object.entries(report)) {
         if (Constants.featureMap.hasOwnProperty(property)) {
             let type = Constants.featureMap[property];

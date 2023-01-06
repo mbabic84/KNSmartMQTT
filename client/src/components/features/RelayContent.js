@@ -8,7 +8,7 @@ const indicatorSize = 72;
 
 export default function (props) {
     function state() {
-        if (props.value === "1") {
+        if (props.value === "1" || props.value === "ON") {
             return (
                 <Avatar sx={{
                     bgcolor: green[800],

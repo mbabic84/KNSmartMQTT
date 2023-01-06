@@ -50,12 +50,10 @@ export default function (props) {
 
     async function getChartData() {
         try {
-            setChartData(
-                await FeaturesApi.getChartData(
-                    props.featureKey,
-                    moment.utc().subtract(24, "hours").format()
-                )
-            );
+            setChartData(await FeaturesApi.getChartData(
+                props.featureKey,
+                moment.utc().subtract(24, "hours").format()
+            ));
         } catch (error) { }
     }
 
@@ -146,6 +144,7 @@ export default function (props) {
 
     function chart() {
         if (chartData.length) {
+            console.log(chartData[0]);
             return (
                 <Card>
                     <ResponsiveContainer height={200}>
@@ -181,6 +180,7 @@ export default function (props) {
                             <Line
                                 dot={false}
                                 dataKey='value'
+                                unit={typeof chartData[0].value === "String" ? "String" : "Number"}
                                 stroke={Constants.colors.type[props.type].primary || Constants.colors.default.primary}
                                 strokeWidth={2}
                                 type={props.type === "relay" ? 'linear' : 'monotone'}
@@ -197,6 +197,8 @@ export default function (props) {
             case "temperature":
             case "pressure":
             case "humidity":
+            case "local_temperature":
+            case "current_heating_setpoint":
                 return (
                     <NumericContent
                         unit={Constants.units?.type?.[props.type]}

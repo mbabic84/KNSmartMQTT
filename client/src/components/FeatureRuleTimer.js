@@ -23,8 +23,8 @@ import { FeaturesContext } from '../App';
 export default function (props) {
     const { features, setFeatures } = useContext(FeaturesContext);
     const [config, setConfig] = useState({
-        start: props.config?.start || moment.utc().format(),
-        end: props.config?.end || moment.utc().add(5, "minute").format()
+        start: props.config?.start || moment.utc().format("HH:mm:ss"),
+        end: props.config?.end || moment.utc().add(5, "minute").format("HH:mm:ss")
     });
 
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function (props) {
     }
 
     function onTimeChange(type, value) {
-        value = moment(value).utc();
+        value = moment(value).utc().format("HH:mm:ss");
         switch (type) {
             case "start":
                 setConfig((prev) => {
@@ -73,7 +73,7 @@ export default function (props) {
                     mask="__:__:__"
                     ampm={false}
                     cancelText="Zrušit"
-                    value={moment.utc(config.start).local()}
+                    value={moment.utc(config.start, "HH:mm:ss").local()}
                 />
                 <MobileTimePicker
                     onChange={(value) => onTimeChange("end", value)}
@@ -84,8 +84,8 @@ export default function (props) {
                     mask="__:__:__"
                     ampm={false}
                     cancelText="Zrušit"
-                    value={moment.utc(config.end).local()}
-                    minTime={moment.utc(config.start).local()}
+                    value={moment.utc(config.end, "HH:mm:ss").local()}
+                    minTime={moment.utc(config.start, "HH:mm:ss").local()}
                 />
             </LocalizationProvider>
             <FormControl>

@@ -3,7 +3,9 @@ import mqttDevices from './devices.js';
 import serverConfig from '../config/server.js';
 import Config from '../config/index.js';
 import pgDevices from '../pg/devices.js';
-import log from '../utils/log.js';
+import log, { warn } from '../utils/log.js';
+
+import heaterControl from '../control/heater.js';
 
 let client;
 let deviceTopics = [];
@@ -67,12 +69,14 @@ async function loop() {
     }
 
     if (loopConfig.intervals?.get && seconds % loopConfig.intervals.get === 0) {
+        heaterControl.init();
+
         if (loopConfig.allowGet) {
             const devices = await pgDevices.get();
             requestMessageFromDevices(devices);
             log("Requesting data from devices");
         } else {
-            log.warn("Configuration mqtt.allowGet is disabled or missing!");
+            warn("Configuration mqtt.allowGet is disabled or missing!");
         }
     }
 }
@@ -80,7 +84,7 @@ async function loop() {
 async function requestMessageFromDevices(devices) {
     for (const device of devices) {
         switch (device.type) {
-            case "zbtrv":
+            case "zbRadiatorValve":
                 await requestStateFromZigBeeTrv(device);
                 break;
             case "nodemcu":
@@ -142,7 +146,7 @@ async function init() {
         } else if (topic === "kn2mqtt/devices") {
             processKNDevice(message);
         } else if (deviceTopics.includes(topic)) {
-            await mqttDevices.saveReport(topic, message);
+            await mqttDevices.processMessage(topic, message);
         }
     })
 

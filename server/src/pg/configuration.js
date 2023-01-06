@@ -16,7 +16,7 @@ async function set({ key, data = {} }) {
         .query(
             `INSERT INTO "configuration" (
                 "key",
-                "data",
+                "data"
             ) VALUES (
                 '${key}',
                 '${JSON.stringify(data)}'

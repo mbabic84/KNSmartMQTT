@@ -87,6 +87,7 @@ export default function (props) {
             case "humidity":
             case "relay":
             case "state":
+            case "local_temperature":
                 return (
                     <RulesButton
                         onClick={handleRulesClick}
@@ -98,9 +99,11 @@ export default function (props) {
     function content() {
         switch (props.type) {
             case "temperature":
+            case "local_temperature":
             case "humidity":
             case "pressure":
             case "setpoint":
+            case "current_heating_setpoint":
                 return (
                     <NumericContent
                         key={props.featureKey}

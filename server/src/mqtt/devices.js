@@ -1,38 +1,26 @@
 import pgDevices from '../pg/devices.js';
 import pgFeatures from '../pg/features.js';
-import heaterQueue from '../control/queue.js';
-import log from '../utils/log.js';
-import { warn } from '../utils/log.js';
+import deviceReport from '../device/report.js';
+import log, { warn } from '../utils/log.js';
+import heaterControl from '../control/heater.js';
 
-const knownZigbeeDevices = {
-    zbtrv: {
-        model_id: "TS0601",
-        manufacturer: "_TZE200_husqqvux"
-    },
-    zbPlug: {
-        model_id: "Plug Value",
-        manufacturer: "LEDVANCE"
-    },
-    zbRealy: {
-        model_id: "BASICZBR3",
-        manufacturer: "SONOFF"
-    },
-    zbBulb: {
-        model_id: "VIYU-A60-806-CCT-10011723",
-        manufacturer: "HORNBACH Baumarkt AG"
-    }
+import Devices from '../Devices.js';
+
+const deviceTypes = {};
+const typeDebounce = {
+    zbRadiatorValve: 5
 };
+const debounceTimers = {};
 
 function getZigBeeDevice(device) {
     let zigBeeDevice;
 
-    Object
-        .entries(knownZigbeeDevices)
-        .forEach(([type, properties]) => {
+    Devices
+        .forEach(({ type, identifiers }) => {
             let matched = true;
 
             Object
-                .entries(properties)
+                .entries(identifiers)
                 .forEach(([property, value]) => {
                     if (device[property] != value) {
                         matched = false;
@@ -56,7 +44,9 @@ async function addZigBee(device) {
 
     if (zigBeeDevice) {
         const d = await pgDevices.set(zigBeeDevice);
-        log(`Device ${d.key} was saved!`);
+        log(`Device ${d.key} (${d.type}) was saved!`);
+
+        deviceTypes[d.key] = d.type;
 
         return d;
     } else {
@@ -83,15 +73,43 @@ async function addKN(device) {
     return d;
 }
 
-async function saveReport(topic, mqttMessage) {
+function parseReport({ message }) {
+    try {
+        return JSON.parse(message);
+    } catch (e) {
+
+    }
+}
+
+async function saveReport({ deviceKey, mqttMessage }) {
+    const report = parseReport({ message: mqttMessage });
+
+    if (report) {
+        const device = await pgDevices.get(deviceKey);
+
+        if (device.type.startsWith("zb")) {
+            await deviceReport.save({ device, report });
+        } else {
+            await pgFeatures.saveReport(report, deviceKey, device);
+        }
+
+        heaterControl.report({ deviceKey, report });
+    }
+}
+
+async function processMessage(topic, mqttMessage) {
     const deviceKey = topic.split("/")[1];
-    const report = JSON.parse(mqttMessage);
-    await pgFeatures.saveReport(report, deviceKey);
-    heaterQueue.add(deviceKey, report);
+    const deviceType = deviceTypes[deviceKey];
+    const debounceTime = typeDebounce[deviceType] || 1;
+
+    clearTimeout(debounceTimers[deviceKey]);
+    debounceTimers[deviceKey] = setTimeout(() => {
+        saveReport({ deviceKey, mqttMessage });
+    }, debounceTime * 1000)
 }
 
 export default {
     addZigBee,
     addKN,
-    saveReport
+    processMessage
 }

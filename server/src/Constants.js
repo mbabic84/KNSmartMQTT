@@ -37,25 +37,24 @@ export default {
     defaults: {
         heater: {
             offset: {
-                zbtrv: 0
+                zbRadiatorValve: -0.5
             },
             limit: {
                 min: 30
             },
             pid: {
-                p: 0,
-                i: 0,
-                d: 0,
-                target: 0,
-                sampleTime: 1,
+                p: 100,
+                i: 0.01,
+                d: 0.01,
                 outputMin: 0,
-                outputMax: 0,
-            }
+                outputMax: 600,
+            },
+            averageValues: 12
         },
         mqtt: {
             allowGet: true,
             intervals: {
-                get: 1200
+                get: 600
             }
         }
     }
