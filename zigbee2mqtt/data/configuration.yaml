@@ -26,9 +26,13 @@ devices:
   '0x00158d0006dbfe5b':
     friendly_name: '0x00158d0006dbfe5b'
   '0x50325ffffe5aa90b':
-    friendly_name: '0x50325ffffe5aa90b'
+    friendly_name: Lampicka - loznice - pracovni stul
+    debounce: 1
+    homeassistant:
+      name: Lampicka - pracovni stul - loznice
+    optimistic: true
   '0xbc33acfffe590f5b':
-    friendly_name: '0xbc33acfffe590f5b'
+    friendly_name: 3DPrinter - KNCube32v2
   '0x842e14fffeefea02':
     friendly_name: '0x842e14fffeefea02'
 advanced:
@@ -43,3 +47,4 @@ advanced:
     protocol: tcp4
     type: '5424'
   last_seen: ISO_8601
+groups: {}

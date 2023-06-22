@@ -14,9 +14,9 @@ services:
     image: eclipse-mosquitto
     volumes:
       - ./config/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
-    restart: 
+    restart:
       always
-    network_mode: 
+    network_mode:
       host
     environment:
       - TZ=Europe/Prague
@@ -30,6 +30,11 @@ services:
     build: ./client
     restart: always
     network_mode: host
+    environment:
+        - TZ=Europe/Prague
+  knsmart-zigbeebind:
+    build: ./ZigbeeBind
+    restart: always
     environment:
         - TZ=Europe/Prague
   knsmart-database:

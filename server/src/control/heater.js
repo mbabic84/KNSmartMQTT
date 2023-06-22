@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { PIDController } from '@mariusrumpf/pid-controller';
+import PID from 'node-pid-controller';
 
 import Config from '../config/index.js';
 import mqtt from '../mqtt/index.js';
@@ -9,12 +9,15 @@ import pgRules from '../pg/rules.js';
 import Constants from '../Constants.js';
 
 let pid = null,
-    lastPidUpdate = null,
     rules = [],
     devices = {},
     active = null,
     config = null,
-    skipNext = false;
+    skipNext = false,
+    prevTemps = {},
+    skip = {},
+    lastPidSum = null,
+    prevSetpoints = {};
 
 async function activate() {
     active = true;
@@ -55,8 +58,28 @@ async function evaluate() {
         await reloadRules();
         let selectedDevice
         for (const [deviceKey, { rule }] of Object.entries(devices)) {
-            const diff = Number(rule.setpoint.value) - Number(rule.current.value);
-            log(`Heater - device check: ${deviceKey}, temperature: ${rule.current.value}, setpoint: ${rule.setpoint.value}, diff: ${diff}`);
+            const temperature = Number(rule.current.value);
+            const setpoint = Number(rule.setpoint.value);
+            const diff = setpoint - temperature;
+            const prevTemp = prevTemps[deviceKey];
+            const prevSetpoint = prevSetpoints[deviceKey];
+
+            log(`Heater - device check: ${deviceKey}, temperature: ${temperature}, prevTemp: ${prevTemp}, setpoint: ${setpoint}, prevSetpoint: ${prevSetpoint}, diff: ${diff}`);
+
+            if (skip[deviceKey] === undefined && prevSetpoint && Math.abs(prevSetpoint - setpoint) >= config.limit.maxSetpointDiff) {
+                skip[deviceKey] = 12;
+            }
+
+            if (skip[deviceKey] === undefined && prevTemp && temperature <= prevTemp - config.limit.maxTempDiff) {
+                skip[deviceKey] = 6;
+            }
+
+            if (skip[deviceKey] >= 1) {
+                log(`Heater - skipped: ${deviceKey} ${skip[deviceKey]}`);
+                skip[deviceKey] = skip[deviceKey] - 1;
+                continue;
+            }
+
             if (!selectedDevice || selectedDevice.diff < diff) {
                 selectedDevice = {
                     key: deviceKey,
@@ -64,6 +87,11 @@ async function evaluate() {
                     diff
                 }
             }
+
+            prevTemps[deviceKey] = Number(rule.current.value);
+            prevSetpoints[deviceKey] = Number(rule.setpoint.value);
+
+            delete skip[deviceKey];
         }
 
         if (selectedDevice) {
@@ -105,75 +133,66 @@ async function heat({ deviceKey, rule }) {
     const input = Number(rule.current.value);
     const type = rule.handler.type;
     const index = rule.handler.key.split("/")[2];
-    const sampleTime = lastPidUpdate ? Date.now() - lastPidUpdate : 1;
+    const pidSum = config.pid.p + config.pid.i + config.pid.d + config.pid.outputMin + config.pid.outputMax;
 
-    if (!pid) {
-        pid = new PIDController({
-            p: config.pid.p,
-            i: config.pid.i,
-            d: config.pid.d,
-            target,
-            sampleTime,
-            outputMin: config.pid.outputMin,
-            outputMax: config.pid.outputMax
+    if (!pid || lastPidSum != pidSum) {
+        pid = new PID({
+            k_p: config.pid.p,
+            k_i: config.pid.i,
+            k_d: config.pid.d
         });
-
         log(
-            `Heater - PID init! P:${config.pid.p} I:${config.pid.i} D:${config.pid.d} Target:${target} Sample:${sampleTime} Min:${config.pid.outputMin} Max:${config.pid.outputMax}`
-        );
-    } else {
-        pid.setTunings(config.pid.p, config.pid.i, config.pid.d);
-        pid.setSampleTime(sampleTime);
-        pid.setOutputLimits(config.pid.outputMin, config.pid.outputMax);
-        pid.setTarget(target);
-
-        log(
-            `Heater - PID update! P:${config.pid.p} I:${config.pid.i} D:${config.pid.d} Target:${target} Sample:${sampleTime} Min:${config.pid.outputMin} Max:${config.pid.outputMax}`
+            `Heater - PID init! P:${config.pid.p} I:${config.pid.i} D:${config.pid.d} Target:${target}`
         );
     }
 
+    pid.setTarget(target);
+
     let output = pid.update(input);
-    if (output === config.pid.outputMax) {
+
+    if (output >= config.pid.outputMax) {
         skipNext = true;
     }
 
-    lastPidUpdate = Date.now();
-
-    const topic = `kn2mqtt/${rule.handler.device.key}/set`;
-    const payload = JSON.stringify({
-        [type]: {
-            [index]: {
-                state: !!(output),
-                duration: output
-            }
-        }
-    });
+    lastPidSum = pidSum;
 
     await Config.set({
         key: "heater",
         data: config
     });
 
-    const diff = Number(target) - Number(input);
-    const boostTime = Constants.defaults.mqtt.intervals.get;
-    if (diff >= 1) {
-        log("Heater - boost", deviceKey, diff, boostTime);
-        await mqtt.publish(
-            `zigbee2mqtt/${deviceKey}/set`,
-            JSON.stringify({
-                boost_timeset_countdown: boostTime
-            })
-        )
-    }
-
     if (output >= config.limit.min) {
-        log("Heater - heating", deviceKey, input, target, output, skipNext, sampleTime);
+        log("Heater - heating", deviceKey, input, target, output, skipNext);
+
+        const topic = `kn2mqtt/${rule.handler.device.key}/set`;
+        const payload = JSON.stringify({
+            [type]: {
+                [index]: {
+                    state: !!(output),
+                    duration: output
+                }
+            }
+        });
+
         await mqtt.publish(
             topic,
             payload
         );
+
+        const diff = Number(target) - Number(input);
+        const boostTime = Constants.defaults.mqtt.intervals.get;
+
+        if (diff >= 1) {
+            log("Heater - boost", deviceKey, diff, boostTime);
+            await mqtt.publish(
+                `zigbee2mqtt/${deviceKey}/set`,
+                JSON.stringify({
+                    boost_timeset_countdown: boostTime
+                })
+            )
+        }
     } else {
-        warn("Heater - heating skipped!", deviceKey, input, target, output, skipNext, sampleTime);
+        warn("Heater - heating skipped!", deviceKey, input, target, output, skipNext);
     }
 }
 

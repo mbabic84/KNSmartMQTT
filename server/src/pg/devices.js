@@ -33,10 +33,10 @@ async function set({ key, type, data = {}, config = {} }) {
             ) VALUES (
                 '${key}',
                 '${type}',
-                '${JSON.stringify(data)}',
+                '${JSON.stringify(data).replace(/'/g, "''")}',
                 '${JSON.stringify(config)}'
             ) ON CONFLICT ("key") DO UPDATE SET
-                "data" = "devices"."data" || '${JSON.stringify(data)}'::JSONB,
+                "data" = "devices"."data" || '${JSON.stringify(data).replace(/'/g, "''")}'::JSONB,
                 "config" = "devices"."config" || '${JSON.stringify(config)}'::JSONB
             RETURNING *
             `

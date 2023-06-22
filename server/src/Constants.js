@@ -40,7 +40,9 @@ export default {
                 zbRadiatorValve: -0.5
             },
             limit: {
-                min: 30
+                min: 30,
+                maxTempDiff: 0.75,
+                maxSetpointDiff: 2
             },
             pid: {
                 p: 100,
@@ -48,8 +50,7 @@ export default {
                 d: 0.01,
                 outputMin: 0,
                 outputMax: 600,
-            },
-            averageValues: 12
+            }
         },
         mqtt: {
             allowGet: true,

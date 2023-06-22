@@ -5,6 +5,7 @@ zigbee2mqtt/data/log
 zigbee2mqtt/data/coordinator_backup.json
 zigbee2mqtt/data/database.db
 zigbee2mqtt/data/state.json
-nodevenv-lts
+node-latest-venv
 py3venv
 client/dist
+ZigbeeBind/node_modules

@@ -153,6 +153,7 @@ void executeSet(byte* payload, unsigned int length) {
 }
 
 void resetRelays() {
+  Serial.println("All relays was set to false!");
   for (byte i = 0; i < sizeof(relayOut); i = i + 1) {
     setRelay(i, false);
   }
@@ -199,6 +200,8 @@ void mqttConnect() {
   }
 
   while (!mqtt.connected()) {
+    resetRelays();
+
     Serial.println("Connecting to MQTT!");
     if (mqtt.connect(clientId.c_str())) {
       Serial.println("Connected to MQTT!");

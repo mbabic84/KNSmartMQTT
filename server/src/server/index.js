@@ -24,9 +24,13 @@ async function listen() {
 }
 
 async function init() {
+    log("Routes init!");
     await routes.init(app);
+    log("SocketIO init!");
     await socketio.init(server);
+    log("Interval control init!");
     intervalControl.init();
+    log("Timer control init!");
     timerControl.init();
     await listen();
 }
