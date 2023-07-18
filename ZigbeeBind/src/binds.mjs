@@ -1,4 +1,4 @@
-import { default as config } from './config.mjs';
+import { default as config } from '../config.mjs';
 
 export function getBind(topic, payload) {
     return config.binds.find((bind) => {
